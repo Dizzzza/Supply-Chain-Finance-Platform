@@ -1,5 +1,7 @@
 # Development of a Blockchain-Based Supply Chain Finance Platform
 
+# Link to [materials](https://eduiitu.sharepoint.com/:f:/s/KazTransLiveReal-TimeVideoTranslationSystem/EoCM8mjlxFJGsDybhExn8lIBCd61tYOGy9vLoeK7HKATcg?e=48q7C3) 
+
 ## Authors
 
 - **Кисамединов Досжан Рүстемұлы** (ID: 31586)
