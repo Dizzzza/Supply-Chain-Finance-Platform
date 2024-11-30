@@ -1,2 +1,2 @@
 # Diploma
-Diploma
+Diploma 2
