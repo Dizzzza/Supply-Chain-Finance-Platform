@@ -1,6 +1,6 @@
 # Development of a Blockchain-Based Supply Chain Finance Platform
 
-# > Link to [MATERIALS](https://eduiitu.sharepoint.com/:f:/s/KazTransLiveReal-TimeVideoTranslationSystem/EoCM8mjlxFJGsDybhExn8lIBCd61tYOGy9vLoeK7HKATcg?e=48q7C3) 
+> # Link to [MATERIALS](https://eduiitu.sharepoint.com/:f:/s/KazTransLiveReal-TimeVideoTranslationSystem/EoCM8mjlxFJGsDybhExn8lIBCd61tYOGy9vLoeK7HKATcg?e=48q7C3) 
 
 ## Authors
 
