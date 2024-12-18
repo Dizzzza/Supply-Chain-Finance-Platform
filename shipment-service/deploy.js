@@ -1,3 +1,14 @@
+const TronWeb = require('tronweb');
+const solc = require('solc');
+
+// Настройки для Tron Nile Testnet
+const tronWeb = new TronWeb({
+    fullHost: 'https://nile.trongrid.io', // Хост Tron Nile
+    headers: { 'TRON-PRO-API-KEY': '6551207c-23e5-435d-a947-4aecd029444a' }, // API-ключ для доступа
+    privateKey: 'c20980e62c2d9b4cbc6b87239d0fa7281e02928bbc50a2e8b6eea12bbdbdd93e', // Приватный ключ аккаунта
+});
+
+const contractCode = `
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
@@ -9,7 +20,7 @@ contract SupplyChain {
         address owner;
         uint256[] statusTimestamps;
         string[] statusHistory;
-        uint256[] transactionIds; // Список идентификаторов транзакций для товара
+        uint256[] transactionIds;
     }
 
     struct Transaction {
@@ -21,8 +32,8 @@ contract SupplyChain {
         string status;
     }
 
-    mapping(uint256 => Product) public products; // Маппинг для продуктов
-    mapping(uint256 => Transaction) public transactions; // Маппинг для транзакций
+    mapping(uint256 => Product) public products;
+    mapping(uint256 => Transaction) public transactions;
 
     event ProductRegistered(uint256 productId, string name, address owner);
     event StatusUpdated(uint256 productId, string status, uint256 timestamp);
@@ -53,7 +64,6 @@ contract SupplyChain {
     function processPayment(uint256 productId, address recipient, uint256 amount) public returns (uint256) {
         uint256 transactionId = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, recipient, amount)));
         
-        // Создание транзакции
         Transaction storage newTransaction = transactions[transactionId];
         newTransaction.transactionId = transactionId;
         newTransaction.sender = msg.sender;
@@ -62,7 +72,6 @@ contract SupplyChain {
         newTransaction.timestamp = block.timestamp;
         newTransaction.status = "Processed";
 
-        // Сохраняем идентификатор транзакции для продукта
         products[productId].transactionIds.push(transactionId);
 
         emit TransactionProcessed(transactionId, msg.sender, recipient, amount, block.timestamp);
@@ -80,3 +89,48 @@ contract SupplyChain {
         return products[productId];
     }
 }
+`;
+
+const compiledContract = JSON.parse(
+    solc.compile(
+        JSON.stringify({
+            language: 'Solidity',
+            sources: {
+                'SupplyChain.sol': {
+                    content: contractCode,
+                },
+            },
+            settings: {
+                outputSelection: {
+                    '*': {
+                        '*': ['abi', 'evm.bytecode'],
+                    },
+                },
+            },
+        })
+    )
+);
+
+// Получение ABI и байткода
+const abi = compiledContract.contracts['SupplyChain.sol']['SupplyChain'].abi;
+const bytecode = compiledContract.contracts['SupplyChain.sol']['SupplyChain'].evm.bytecode.object;
+
+async function deploy_contract() {
+    try {
+        let contract_instance = await tronWeb.contract().new({
+            abi: abi,  // Используем уже распарсенный объект
+            bytecode: bytecode,
+            feeLimit: 1_000_000_000,  // лимит газа для транзакции
+            callValue: 0,             // сумма, которая будет передана контракту
+            userFeePercentage: 1,     // процент на оплату комиссии пользователем
+            originEnergyLimit: 10_000_000, // лимит энергии для транзакции
+        });
+        
+
+        console.log('Контракт развернут по адресу:', contract_instance.address);
+    } catch (error) {
+        console.error('Ошибка развертывания:', error);
+    }
+}
+
+deploy_contract();
