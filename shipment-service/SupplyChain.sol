@@ -27,6 +27,7 @@ contract SupplyChain {
     event ProductRegistered(uint256 productId, string name, address owner);
     event StatusUpdated(uint256 productId, string status, uint256 timestamp);
     event TransactionProcessed(uint256 transactionId, address sender, address recipient, uint256 amount, uint256 timestamp);
+    uint256 public transactionCounter;
 
     function registerProduct(uint256 productId, string memory name, string memory description) public {
         require(products[productId].id == 0, "Product already exists");
@@ -51,8 +52,10 @@ contract SupplyChain {
     }
 
     function processPayment(uint256 productId, address recipient, uint256 amount) public returns (uint256) {
-        uint256 transactionId = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, recipient, amount)));
-        
+        transactionCounter++;
+
+        uint256 transactionId = transactionCounter;
+
         Transaction storage newTransaction = transactions[transactionId];
         newTransaction.transactionId = transactionId;
         newTransaction.sender = msg.sender;

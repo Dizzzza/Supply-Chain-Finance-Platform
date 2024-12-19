@@ -7,34 +7,119 @@ const tronWeb = new TronWeb({
 });
 
 // Адрес вашего контракта
-const contractAddress = 'THUnvgrFUW9GqaJajGQWFZCBK1goyLZKJM'; // Замените на адрес контракта
+const contractAddress = 'TSkx7ZCDspvNdXbGTM8pmmQCYemhU7Zq6g'; // Замените на адрес контракта
 
 // ABI контракта (сокращенный пример)
 const abi = [
   {
-    "inputs": [{"name":"productId","type":"uint256"},{"name":"name","type":"string"},{"name":"owner","type":"address"}],
-    "name":"ProductRegistered",
-    "type":"Event"
+  "inputs": [
+    { "name": "productId", "type": "uint256" },
+    { "name": "name", "type": "string" },
+    { "name": "owner", "type": "address" }
+  ],
+  "name": "ProductRegistered",
+  "type": "Event"
   },
   {
-    "outputs": [{"type":"tuple"}],
-    "inputs": [{"name":"productId","type":"uint256"}],
-    "name":"getProduct",
-    "stateMutability":"View",
-    "type":"Function"
+  "inputs": [
+    { "name": "productId", "type": "uint256" },
+    { "name": "status", "type": "string" },
+    { "name": "timestamp", "type": "uint256" }
+  ],
+  "name": "StatusUpdated",
+  "type": "Event"
   },
   {
-    "outputs": [{"name":"transactionId","type":"uint256"},{"name":"sender","type":"address"},{"name":"recipient","type":"address"},{"name":"amount","type":"uint256"},{"name":"timestamp","type":"uint256"}],
-    "inputs": [{"type":"uint256"}],
-    "name":"transactions",
-    "stateMutability":"View",
-    "type":"Function"
+  "inputs": [
+    { "name": "transactionId", "type": "uint256" },
+    { "name": "sender", "type": "address" },
+    { "name": "recipient", "type": "address" },
+    { "name": "amount", "type": "uint256" },
+    { "name": "timestamp", "type": "uint256" }
+  ],
+  "name": "TransactionProcessed",
+  "type": "Event"
   },
   {
-    "inputs": [{"name":"productId","type":"uint256"},{"name":"name","type":"string"},{"name":"description","type":"string"}],
-    "name":"registerProduct",
-    "stateMutability":"Nonpayable",
-    "type":"Function"
+    "outputs": [{
+      "type": "tuple",
+      "components": [
+        { "name": "id", "type": "uint256" },
+        { "name": "name", "type": "string" },
+        { "name": "description", "type": "string" },
+        { "name": "owner", "type": "address" },
+        { "name": "statusTimestamps", "type": "uint256[]" },
+        { "name": "statusHistory", "type": "string[]" },
+        { "name": "transactionIds", "type": "uint256[]" }
+      ]
+    }],
+    "inputs": [{ "name": "productId", "type": "uint256" }],
+    "name": "getProduct",
+    "stateMutability": "view",
+    "type": "function"
+  },  
+  {
+  "outputs": [{ "type": "tuple" }],
+  "inputs": [{ "name": "transactionId", "type": "uint256" }],
+  "name": "getTransaction",
+  "stateMutability": "View",
+  "type": "Function"
+  },
+  {
+  "outputs": [{ "type": "uint256" }],
+  "inputs": [
+    { "name": "productId", "type": "uint256" },
+    { "name": "recipient", "type": "address" },
+    { "name": "amount", "type": "uint256" }
+  ],
+  "name": "processPayment",
+  "stateMutability": "Nonpayable",
+  "type": "Function"
+  },
+  {
+  "outputs": [
+    { "name": "id", "type": "uint256" },
+    { "name": "name", "type": "string" },
+    { "name": "description", "type": "string" },
+    { "name": "owner", "type": "address" }
+  ],
+  "inputs": [{ "type": "uint256" }],
+  "name": "products",
+  "stateMutability": "View",
+  "type": "Function"
+  },
+  {
+  "inputs": [
+    { "name": "productId", "type": "uint256" },
+    { "name": "name", "type": "string" },
+    { "name": "description", "type": "string" }
+  ],
+  "name": "registerProduct",
+  "stateMutability": "Nonpayable",
+  "type": "Function"
+  },
+  {
+  "outputs": [
+    { "name": "transactionId", "type": "uint256" },
+    { "name": "sender", "type": "address" },
+    { "name": "recipient", "type": "address" },
+    { "name": "amount", "type": "uint256" },
+    { "name": "timestamp", "type": "uint256" },
+    { "name": "status", "type": "string" }
+  ],
+  "inputs": [{ "type": "uint256" }],
+  "name": "transactions",
+  "stateMutability": "View",
+  "type": "Function"
+  },
+  {
+  "inputs": [
+    { "name": "productId", "type": "uint256" },
+    { "name": "status", "type": "string" }
+  ],
+  "name": "updateStatus",
+  "stateMutability": "Nonpayable",
+  "type": "Function"
   }
 ];
 
@@ -64,4 +149,4 @@ async function registerProduct(productId, name, description) {
   
   
 // Вызов функции
-getProduct(12345); // Пример получения продукта с ID = 12345
+getProduct(1);
