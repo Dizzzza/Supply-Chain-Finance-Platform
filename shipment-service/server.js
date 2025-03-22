@@ -1,6 +1,7 @@
 // server.js
 const express = require('express');
 const bodyParser = require('body-parser');
+const routes = require("./routes");
 require('dotenv').config();
 
 const app = express();
@@ -8,6 +9,7 @@ const app = express();
 // Middleware
 app.use(bodyParser.json());
 app.use(express.json());
+app.use('/', routes);
 
 // Запуск сервиса
 app.listen(process.env.PORT, () => {

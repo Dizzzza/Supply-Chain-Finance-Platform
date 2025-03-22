@@ -2,82 +2,74 @@
 pragma solidity ^0.8.0;
 
 contract SupplyChain {
-    struct Product {
-        uint256 id;
+    struct Shipment {
+        string uuid;
         string name;
         string description;
         address owner;
         uint256[] statusTimestamps;
         string[] statusHistory;
-        uint256[] transactionIds;
+        string[] handlerHistory;
+        string[] transactionHashs;
+        bool exists;
     }
 
-    struct Transaction {
-        uint256 transactionId;
-        address sender;
-        address recipient;
-        uint256 amount;
-        uint256 timestamp;
-        string status;
+    mapping(bytes32 => Shipment) public shipments;
+
+    event ShipmentRegistered(string shipmentUuid, string name, address owner);
+    event StatusUpdated(string shipmentUuid, string status, string handler, uint256 timestamp);
+    event TransactionProcessed(string transactionHash, string shipmentName);
+
+    function registerShipment(string memory shipmentUuid, string memory name, string memory description) public {
+        bytes32 shipmentKey = keccak256(abi.encodePacked(shipmentUuid));
+        require(!shipments[shipmentKey].exists, "Shipment already exists");
+
+        Shipment storage newShipment = shipments[shipmentKey];
+        newShipment.uuid = shipmentUuid;
+        newShipment.name = name;
+        newShipment.description = description;
+        newShipment.owner = msg.sender;
+        newShipment.exists = true;
+        shipments[shipmentKey].handlerHistory.push("Manufacturer");
+        shipments[shipmentKey].statusHistory.push("Started");
+
+        emit ShipmentRegistered(shipmentUuid, name, msg.sender);
     }
 
-    mapping(uint256 => Product) public products;
-    mapping(uint256 => Transaction) public transactions;
+    function updateStatus(string memory shipmentUuid, string memory status, string memory handler) public {
+        bytes32 shipmentKey = keccak256(abi.encodePacked(shipmentUuid));
+        require(shipments[shipmentKey].exists, "Shipment does not exist");
+        require(shipments[shipmentKey].owner == msg.sender, "Only owner can update status");
 
-    event ProductRegistered(uint256 productId, string name, address owner);
-    event StatusUpdated(uint256 productId, string status, uint256 timestamp);
-    event TransactionProcessed(uint256 transactionId, address sender, address recipient, uint256 amount, uint256 timestamp);
-    uint256 public transactionCounter;
+        shipments[shipmentKey].statusHistory.push(status);
+        shipments[shipmentKey].handlerHistory.push(handler);
+        shipments[shipmentKey].statusTimestamps.push(block.timestamp);
 
-    function registerProduct(uint256 productId, string memory name, string memory description) public {
-        require(products[productId].id == 0, "Product already exists");
-
-        Product storage newProduct = products[productId];
-        newProduct.id = productId;
-        newProduct.name = name;
-        newProduct.description = description;
-        newProduct.owner = msg.sender;
-
-        emit ProductRegistered(productId, name, msg.sender);
+        emit StatusUpdated(shipmentUuid, status, handler, block.timestamp);
     }
 
-    function updateStatus(uint256 productId, string memory status) public {
-        require(products[productId].id != 0, "Product does not exist");
-        require(products[productId].owner == msg.sender, "Only owner can update status");
+    function processPayment(string memory transactionHash, string memory shipmentUuid) public {
+        bytes32 shipmentKey = keccak256(abi.encodePacked(shipmentUuid));
+        require(shipments[shipmentKey].exists, "Shipment does not exist");
+        require(shipments[shipmentKey].owner == msg.sender, "Only owner can add Transaction");
 
-        products[productId].statusHistory.push(status);
-        products[productId].statusTimestamps.push(block.timestamp);
+        // Проверка наличия transactionHash в массиве
+        string[] storage transactionHashes = shipments[shipmentKey].transactionHashs;
+        for (uint i = 0; i < transactionHashes.length; i++) {
+            require(keccak256(abi.encodePacked(transactionHashes[i])) != keccak256(abi.encodePacked(transactionHash)), "Transaction already exists");
+        }
 
-        emit StatusUpdated(productId, status, block.timestamp);
+        // Добавление нового хеша транзакции
+        transactionHashes.push(transactionHash);
+
+        emit TransactionProcessed(transactionHash, shipmentUuid);
     }
 
-    function processPayment(uint256 productId, address recipient, uint256 amount) public returns (uint256) {
-        transactionCounter++;
 
-        uint256 transactionId = transactionCounter;
-
-        Transaction storage newTransaction = transactions[transactionId];
-        newTransaction.transactionId = transactionId;
-        newTransaction.sender = msg.sender;
-        newTransaction.recipient = recipient;
-        newTransaction.amount = amount;
-        newTransaction.timestamp = block.timestamp;
-        newTransaction.status = "Processed";
-
-        products[productId].transactionIds.push(transactionId);
-
-        emit TransactionProcessed(transactionId, msg.sender, recipient, amount, block.timestamp);
-
-        return transactionId;
-    }
-
-    function getTransaction(uint256 transactionId) public view returns (Transaction memory) {
-        require(transactions[transactionId].transactionId != 0, "Transaction does not exist");
-        return transactions[transactionId];
-    }
-
-    function getProduct(uint256 productId) public view returns (Product memory) {
-        require(products[productId].id != 0, "Product does not exist");
-        return products[productId];
+    function getShipment(string memory shipmentUuid) public view returns (Shipment memory) {
+        bytes32 shipmentKey = keccak256(abi.encodePacked(shipmentUuid));
+        require(shipments[shipmentKey].exists, "Shipment does not exist");
+        return shipments[shipmentKey];
     }
 }
+ver 0.8.6+commit.11564f7e
