@@ -1,4 +1,7 @@
 const pool = require('./db'); // Импортируем настроенный пул подключений
+const contract = require('../models/cotract'); // Исправлено опечатку в имени файла
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
 
 // Функция для создания компании
 async function createCompany(name, description) {
@@ -35,14 +38,26 @@ async function createSupplier(name, description) {
 // Функция для создания отправки
 async function createShipment(companyId, supplierId, fiatAmount, fiatCurrency, cryptoAmount, status, handler, name, description) {
     const shipmentUuid = uuidv4(); // Генерация UUID
-    const query = `
-        INSERT INTO shipments (uuid, company_id, supplier_id, fiat_amount, fiat_currency, crypto_amount, status, handler, name, description)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-        RETURNING *;
-    `;
+
     try {
+        // Получение wallet_address из таблицы suppliers
+        const supplierQuery = `
+            SELECT wallet_address FROM suppliers WHERE id = $1;
+        `;
+        const supplierResult = await pool.query(supplierQuery, [supplierId]);
+        if (supplierResult.rows.length === 0) {
+            throw new Error('Supplier not found');
+        }
+        const deliveryWallet = supplierResult.rows[0].wallet_address;
+
+        // Вставка данных в таблицу shipments
+        const query = `
+            INSERT INTO shipments (uuid, company_id, supplier_id, fiat_amount, fiat_currency, crypto_amount, status, handler, name, description)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING *;
+        `;
         const result = await pool.query(query, [
-            shipmentUuid, // Вставляем сгенерированный UUID
+            shipmentUuid,
             companyId,
             supplierId,
             fiatAmount,
@@ -53,7 +68,26 @@ async function createShipment(companyId, supplierId, fiatAmount, fiatCurrency, c
             name,
             description
         ]);
-        return result.rows[0]; // Возвращаем созданную запись
+        const createdShipment = result.rows[0];
+
+        // Вызов смарт-контракта для регистрации отправления
+        const contractResult = await contract.registerShipment(shipmentUuid, deliveryWallet);
+        if (!contractResult.success) {
+            throw new Error('Failed to register shipment in the smart contract');
+        }
+
+        // Генерация JWT токена
+        const token = jwt.sign(
+            { shipmentUuid, companyId, supplierId },
+            process.env.JWT_SECRET
+        );
+
+        // Возвращаем результат с токеном
+        return {
+            ...createdShipment,
+            token,
+            message: 'Shipment created and registered successfully',
+        };
     } catch (error) {
         console.error('Error creating shipment:', error);
         throw error;
@@ -140,11 +174,29 @@ async function createEntity(type, name, description = null) {
     }
 }
 
+async function revokeToken(token) {
+    try {
+        // Декодирование токена для получения времени истечения
+        const decoded = jwt.decode(token);
+        const expiresAt = new Date(decoded.exp * 1000); // Преобразуем секунды в миллисекунды
+
+        // Добавление токена в черный список
+        await pool.query(
+            'INSERT INTO token_blacklist (token, expires_at) VALUES ($1, $2)',
+            [token, expiresAt]
+        );
+    } catch (error) {
+        console.error('Error revoking token:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     createCompany,
     createSupplier,
     createShipment,
     createTransaction,
     getCompaniesAndSuppliers,
-    createEntity
+    createEntity,
+    revokeToken
 };

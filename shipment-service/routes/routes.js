@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const contract = require('../models/cotract'); // Исправлено опечатку в имени файла
 const service = require('../models/service'); // Импортируем функции для работы с базой данных
+const authMiddleware = require('../middleware/jwtMiddleware'); // Импорт middleware
 
 // Создание компании
 router.post('/createCompany', async (req, res) => {
@@ -84,7 +85,7 @@ router.get('/getShipment/:shipmentUuid', async (req, res) => {
 });
 
 // Обновление статуса отправки
-router.post('/updateStatus', async (req, res) => {
+router.post('/updateStatus', authMiddleware, async (req, res) => {
     const { shipmentUuid, status, handler, amountInSun } = req.body;
     try {
         const result = await contract.updateStatus(shipmentUuid, status, handler, amountInSun || 0);
@@ -100,7 +101,7 @@ router.post('/updateStatus', async (req, res) => {
 });
 
 // Обработка платежа
-router.post('/processPayment', async (req, res) => {
+router.post('/processPayment', authMiddleware, async (req, res) => {
     const { transactionHash, shipmentUuid } = req.body;
     try {
         const result = await contract.processPayment(transactionHash, shipmentUuid);
