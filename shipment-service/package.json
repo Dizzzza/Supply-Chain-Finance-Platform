@@ -13,9 +13,10 @@
     "bignumber.js": "^9.1.2",
     "ethers": "^6.13.4",
     "fs": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
     "solc": "^0.8.20",
     "tron-solc": "^0.4.24",
-    "tronweb": "5.3.1",
+    "tronweb": "^5.3.1",
     "uuid": "^11.1.0",
     "web3": "^4.16.0"
   }

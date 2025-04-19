@@ -99,17 +99,16 @@ async function getShipment(shipmentUuid) {
         const address = tronWeb.address.fromHex(shipment.deliveryWallet);
         // Извлекаем данные из объекта shipment
         const parsedData = {
-        uuid: shipment.uuid, // Уникальный идентификатор поставки
-        owner: shipment.owner, // Владелец поставки
-        statusTimestamps: shipment.statusTimestamps.map(bn => bn.toNumber()), // Преобразуем BigNumber в числа
-        statusHistory: shipment.statusHistory, // История статусов
-        handlerHistory: shipment.handlerHistory, // История обработчиков
-        transactionHashs: shipment.transactionHashs, // Хеши транзакций
-        deliveryWallet: address, // Кошелек для доставки
-        exists: shipment.exists, // Флаг существования поставки
+          uuid: shipment.uuid, // Уникальный идентификатор поставки
+          owner: shipment.owner, // Владелец поставки
+          statusTimestamps: shipment.statusTimestamps.map(bn => bn.toNumber()), // Преобразуем BigNumber в числа
+          statusHistory: shipment.statusHistory, // История статусов
+          handlerHistory: shipment.handlerHistory, // История обработчиков
+          transactionHashs: shipment.transactionHashs, // Хеши транзакций
+          deliveryWallet: address, // Кошелек для доставки
+          exists: shipment.exists, // Флаг существования поставки
         };
 
-        console.log(parsedData);
         // Возвращаем данные в удобном формате
         return { success: true, data: parsedData };
     } catch (error) {
