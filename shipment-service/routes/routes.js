@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const contract = require('../models/cotract'); // Исправлено опечатку в имени файла
+const contract = require('../models/contract'); // Исправлено опечатку в имени файла
 const service = require('../models/service'); // Импортируем функции для работы с базой данных
 const authMiddleware = require('../middleware/jwtMiddleware'); // Импорт middleware
 
 // Создание компании
-router.post('/createCompany', async (req, res) => {
+router.post('/createCompany', authMiddleware, async (req, res) => {
     const { name, description } = req.body;
     try {
         const company = await service.createCompany(name, description);
@@ -17,7 +17,7 @@ router.post('/createCompany', async (req, res) => {
 });
 
 // Создание поставщика
-router.post('/createSupplier', async (req, res) => {
+router.post('/createSupplier', authMiddleware, async (req, res) => {
     const { name, description } = req.body;
     try {
         const supplier = await service.createSupplier(name, description);
@@ -29,10 +29,10 @@ router.post('/createSupplier', async (req, res) => {
 });
 
 // Создание отправки
-router.post('/createShipment', async (req, res) => {
-    const { companyId, supplierId, fiatAmount, fiatCurrency, cryptoAmount, status, handler, name, description } = req.body;
+router.post('/createShipment', authMiddleware, async (req, res) => {
+    const { companyId, supplierId, fiatAmount, status, handler, name, description } = req.body;
     try {
-        const shipment = await service.createShipment(companyId, supplierId, fiatAmount, fiatCurrency, cryptoAmount, status, handler, name, description);
+        const shipment = await service.createShipment(companyId, supplierId, fiatAmount, status, handler, name, description);
         res.status(201).json({ success: true, data: shipment });
     } catch (err) {
         console.error('Error in createShipment:', err);
@@ -41,10 +41,10 @@ router.post('/createShipment', async (req, res) => {
 });
 
 // Создание транзакции
-router.post('/createTransaction', async (req, res) => {
-    const { shipmentId, amount, currency, blockchainTxId, status, blockchainId, tokenId } = req.body;
+router.post('/createTransaction', authMiddleware, async (req, res) => {
+    const { shipmentId, blockchainTxId, trxAmount, usdtAmount } = req.body;
     try {
-        const transaction = await service.createTransaction(shipmentId, amount, currency, blockchainTxId, status, blockchainId, tokenId);
+        const transaction = await service.createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmount);
         res.status(201).json({ success: true, data: transaction });
     } catch (err) {
         console.error('Error in createTransaction:', err);
@@ -53,7 +53,7 @@ router.post('/createTransaction', async (req, res) => {
 });
 
 // Создание отправки (старый метод)
-router.post('/registerShipment', async (req, res) => {
+router.post('/registerShipment', authMiddleware, async (req, res) => {
     const { uuid, deliveryWallet } = req.body; // Изменено на deliveryWallet
     try {
         const result = await contract.registerShipment(uuid, deliveryWallet);
@@ -68,8 +68,8 @@ router.post('/registerShipment', async (req, res) => {
     }
 });
 
-// Получение статуса отправки
-router.get('/getShipment/:shipmentUuid', async (req, res) => {
+// Получение информации поставки из блокчейна
+router.get('/getShipmentBlockchain/:shipmentUuid', async (req, res) => {
     const shipmentUuid = req.params.shipmentUuid;
     try {
         const result = await contract.getShipment(shipmentUuid);
@@ -84,9 +84,71 @@ router.get('/getShipment/:shipmentUuid', async (req, res) => {
     }
 });
 
+// Получение всей информации о поставке
+router.get('/getShipment/:shipmentID', authMiddleware, async (req, res) => {
+    const shipmentID = req.params.shipmentID;
+    try {
+        const result = await service.getShipment(shipmentID);
+        if (result.success) {
+            res.status(200).json(result);
+        } else {
+            res.status(404).json(result); // Более точный статус для отсутствующей поставки
+        }
+    } catch (err) {
+        console.error('Error in getShipment:', err);
+        res.status(500).json({ error: 'Failed to fetch shipment' });
+    }
+});
+
+router.get('/getShipments', authMiddleware, async (req, res) => {
+    try {
+        // Извлечение параметров из query
+        const { type, id, ...filters } = req.query;
+
+        // Проверка наличия обязательных параметров
+        if (!type || !id) {
+            return res.status(400).json({ error: 'Missing required parameters: type and id' });
+        }
+
+        // Преобразование id в число
+        const parsedId = parseInt(id, 10);
+        if (isNaN(parsedId)) {
+            return res.status(400).json({ error: 'Invalid id. Must be a number.' });
+        }
+
+        // Преобразование временных фильтров в объект Date
+        const parsedFilters = {};
+        if (filters.created_after) parsedFilters.created_after = new Date(filters.created_after);
+        if (filters.created_before) parsedFilters.created_before = new Date(filters.created_before);
+        if (filters.updated_after) parsedFilters.updated_after = new Date(filters.updated_after);
+        if (filters.updated_before) parsedFilters.updated_before = new Date(filters.updated_before);
+        if (filters.status) parsedFilters.status = filters.status;
+        if (filters.handler) parsedFilters.handler = filters.handler;
+
+        // Вызов функции getShipments
+        const shipments = await service.getShipments(type, parsedId, parsedFilters);
+
+        // Если данные найдены, отправляем их
+        if (shipments.length > 0) {
+            res.status(200).json(shipments);
+        } else {
+            res.status(404).json({ error: 'No shipments found for the given parameters' });
+        }
+    } catch (error) {
+        console.error('Error in /getShipments:', error.message);
+        res.status(500).json({ error: 'Failed to fetch shipments' });
+    }
+});
+
 // Обновление статуса отправки
 router.post('/updateStatus', authMiddleware, async (req, res) => {
-    const { shipmentUuid, status, handler, amountInSun } = req.body;
+    const { shipmentUuid, status, handler } = req.body;
+    let amountInSun;
+    if (status == "Delivered" && handler == "Retailer") {
+        const amount = await service.getAmountByUuid(shipmentUuid);
+        amountInSun = amount * 1e6;
+    }
+    console.log(amountInSun);
     try {
         const result = await contract.updateStatus(shipmentUuid, status, handler, amountInSun || 0);
         if (result.success) {
@@ -116,7 +178,7 @@ router.post('/processPayment', authMiddleware, async (req, res) => {
     }
 });
 
-router.get('/getEntities', async (req, res) => {
+router.get('/getEntities', authMiddleware, async (req, res) => {
     try {
         const data = await service.getCompaniesAndSuppliers();
         res.status(200).json({ success: true, data });
@@ -126,7 +188,7 @@ router.get('/getEntities', async (req, res) => {
     }
 });
 
-router.post('/createEntity', async (req, res) => {
+router.post('/createEntity', authMiddleware, async (req, res) => {
     const { type, name, description } = req.body;
 
     try {

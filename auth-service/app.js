@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 // Маршруты
 const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+app.use('/', authRoutes);
 
 // Защищенный маршрут
 const authMiddleware = require('./middleware/authMiddleware');
@@ -20,7 +20,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 });
 
 // Запуск сервера
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

@@ -27,34 +27,22 @@ CREATE TABLE shipments (
 	handler VARCHAR(50),
 	name VARCHAR(50),
 	description VARCHAR(50),
+    init BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id)
 );
 
-CREATE TABLE blockchain_networks (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    network_id VARCHAR(100) NOT NULL,
-    explorer_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     shipment_id INTEGER NOT NULL,
     amount DECIMAL(18, 8) NOT NULL,
-    currency VARCHAR(10) NOT NULL,
-    blockchain_tx_id VARCHAR(255),
-    status VARCHAR(50),
-    blockchain_id INTEGER NOT NULL,
-    token_id INTEGER,
+    blockchain_tx_id VARCHAR(255) UNIQUE,
+    token_name VARCHAR(64),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (shipment_id) REFERENCES shipments(id),
-    FOREIGN KEY (blockchain_id) REFERENCES blockchain_networks(id)
+    FOREIGN KEY (shipment_id) REFERENCES shipments(id)
 );
 
 CREATE TABLE token_blacklist (
