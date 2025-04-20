@@ -26,9 +26,11 @@ router.post('/register', async (req, res) => {
 
         // Если компания/поставщик не найдены, создаем нового
         if (!entity) {
+            console.log(234)
             const newEntity = await addEntity(role, entityName); // Передаем роль как type
-            entity = { id: newEntity.id, name: newEntity.name };
+            entity = { id: newEntity.data.id, name: newEntity.data.name };
         }
+        console.log(entity)
 
         // Проверка, существует ли пользователь
         const userExists = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
