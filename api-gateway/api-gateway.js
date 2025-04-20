@@ -23,5 +23,5 @@ app.use('/auth', createProxyMiddleware({
 
 // Запускаем api-gateway на порту 3000
 app.listen(3003, () => {
-  console.log('API Gateway запущен на http://localhost:3000');
+  console.log('API Gateway запущен на http://localhost:3003');
 });
