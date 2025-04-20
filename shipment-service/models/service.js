@@ -378,6 +378,24 @@ async function createEntity(type, name, description = null) {
     }
 }
 
+async function updateSupplierWallet(supplierId, walletAddress) {
+    const query = `
+        UPDATE suppliers
+        SET wallet_address = $1
+        WHERE id = $2
+        RETURNING *;
+    `;
+
+    try {
+        const result = await pool.query(query, [walletAddress, supplierId]);
+        return result.rows[0]; // возвращаем обновлённую запись
+    } catch (error) {
+        console.error(`Error updating supplier wallet:`, error);
+        throw error;
+    }
+}
+
+
 async function revokeToken(token) {
     try {
         // Декодирование токена для получения времени истечения
@@ -550,5 +568,6 @@ module.exports = {
     revokeToken,
     getAmountByUuid,
     getShipments,
-    getShipment
+    getShipment,
+    updateSupplierWallet
 };
