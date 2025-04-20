@@ -201,4 +201,17 @@ router.post('/createEntity', authMiddleware, async (req, res) => {
     }
 });
 
+router.post('/addSupplierWallet', authMiddleware, async (req, res) => {
+    const { supplierID, walletAddress } = req.body;
+
+    try {
+        // Создаем запись с помощью универсальной функции
+        const entity = await service.updateSupplierWallet(supplierID, walletAddress);
+        res.status(201).json({ success: true, data: entity });
+    } catch (err) {
+        console.error('Error in createEntity:', err);
+        res.status(400).json({ success: false, error: err.message || 'Failed to create entity' });
+    }
+});
+
 module.exports = router;
