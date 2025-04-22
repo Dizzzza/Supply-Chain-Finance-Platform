@@ -99,7 +99,6 @@ router.get('/verify-email', async (req, res) => {
     }
 });
 
-// Вход пользователя (без изменений)
 router.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -117,8 +116,27 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Генерация JWT
-        const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Получение данных из user_roles
+        const roleResult = await pool.query(
+            'SELECT role_type, entity_id FROM user_roles WHERE user_id = $1',
+            [user.id]
+        );
+        const role = roleResult.rows[0];
+        if (!role) {
+            return res.status(400).json({ message: 'User role not found' });
+        }
+
+        // Генерация JWT с данными пользователя и роли
+        const token = jwt.sign(
+            {
+                user_id: user.id,
+                username: user.username,
+                role_type: role.role_type,
+                entity_id: role.entity_id
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
         res.json({ message: 'Login successful', token });
     } catch (error) {
