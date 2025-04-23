@@ -7,6 +7,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     email: '',
     entityName: '',
+    description: '',
     username: '',
     password: '',
     confirmPassword: ''
@@ -54,6 +55,7 @@ const Register = () => {
         password: formData.password,
         role: userType,
         entityName: formData.entityName,
+        description: formData.description,
         email: formData.email
       });
 
@@ -113,6 +115,20 @@ const Register = () => {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
                 placeholder={`Название ${userType === 'company' ? 'компании' : 'поставщика'}`}
+              />
+            </div>
+            <div>
+              <label htmlFor="description" className="sr-only">
+                Описание {userType === 'company' ? 'компании' : 'поставщика'}
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
+                placeholder={`Описание ${userType === 'company' ? 'компании' : 'поставщика'}`}
+                rows="3"
               />
             </div>
             <div>

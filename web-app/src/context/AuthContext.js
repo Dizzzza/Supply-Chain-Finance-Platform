@@ -61,8 +61,9 @@ export const AuthProvider = ({ children }) => {
                 username: userData.username,
                 password: userData.password,
                 email: userData.email,
-                role: 'company',
-                entityName: userData.entityName || userData.username // Если entityName не указан, используем username
+                role: userData.role,
+                entityName: userData.entityName,
+                description: userData.description
             };
 
             console.log('Подготовленные данные для отправки:', requestData);

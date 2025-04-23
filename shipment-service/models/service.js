@@ -355,6 +355,12 @@ async function getCompaniesAndSuppliers() {
 }
 
 async function createEntity(type, name, description = null) {
+    console.log('Creating entity with data:', {
+        type,
+        name,
+        description
+    });
+
     // Проверяем допустимость типа
     if (type !== 'company' && type !== 'supplier') {
         throw new Error('Invalid type. Type must be "company" or "supplier".');
@@ -370,7 +376,9 @@ async function createEntity(type, name, description = null) {
 
     try {
         // Выполняем запрос к базе данных
+        console.log('Executing query with params:', [name, description]);
         const result = await pool.query(query, [name, description]);
+        console.log('Query result:', result.rows[0]);
         return result.rows[0]; // Возвращаем созданную запись
     } catch (error) {
         console.error(`Error creating ${type}:`, error);

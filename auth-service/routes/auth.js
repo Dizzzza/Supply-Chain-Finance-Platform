@@ -10,7 +10,15 @@ const { sendPasswordResetEmail } = require('../models/mailer');
 // Регистрация пользователя
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, role, entityName, email } = req.body;
+        const { username, password, role, entityName, description, email } = req.body;
+        
+        console.log('Received registration data:', {
+            username,
+            role,
+            entityName,
+            description,
+            email
+        });
 
         // Проверка ввода
         if (!['company', 'supplier'].includes(role)) {
@@ -26,11 +34,16 @@ router.post('/register', async (req, res) => {
 
         // Если компания/поставщик не найдены, создаем нового
         if (!entity) {
-            console.log(234)
-            const newEntity = await addEntity(role, entityName); // Передаем роль как type
+            console.log('Creating new entity with data:', {
+                type: role,
+                name: entityName,
+                description: description
+            });
+            const newEntity = await addEntity(role, entityName, description);
+            console.log('New entity created:', newEntity);
             entity = { id: newEntity.data.id, name: newEntity.data.name };
         }
-        console.log(entity)
+        console.log('Final entity data:', entity);
 
         // Проверка, существует ли пользователь
         const userExists = await pool.query('SELECT * FROM users WHERE username = $1', [username]);

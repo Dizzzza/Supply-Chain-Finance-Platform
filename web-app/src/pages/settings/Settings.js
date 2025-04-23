@@ -88,46 +88,6 @@ const Settings = () => {
               </div>
             </div>
 
-            {/* Уведомления */}
-            <div className="px-4 py-6 sm:p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">Уведомления</h4>
-              <div className="space-y-4">
-                <div className="relative flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="email-notifications"
-                      name="email-notifications"
-                      type="checkbox"
-                      className="focus:ring-primary-500 h-5 w-5 text-primary-600 border-gray-300 rounded"
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <label htmlFor="email-notifications" className="font-medium text-gray-700">
-                      Email уведомления
-                    </label>
-                    <p className="text-sm text-gray-500">Получать уведомления на email</p>
-                  </div>
-                </div>
-
-                <div className="relative flex items-start">
-                  <div className="flex items-center h-5">
-                    <input
-                      id="push-notifications"
-                      name="push-notifications"
-                      type="checkbox"
-                      className="focus:ring-primary-500 h-5 w-5 text-primary-600 border-gray-300 rounded"
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <label htmlFor="push-notifications" className="font-medium text-gray-700">
-                      Push уведомления
-                    </label>
-                    <p className="text-sm text-gray-500">Получать push-уведомления</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Кнопки действий */}
             <div className="px-4 py-4 sm:px-6 bg-gray-50 flex justify-end space-x-3">
               <Link
