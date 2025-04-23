@@ -22,17 +22,10 @@ import {
 const navigation = [
   { name: 'Главная', href: '/', icon: HomeIcon },
   { name: 'Панель управления', href: '/dashboard', icon: ChartBarIcon },
-  { name: 'Уведомления', href: '/dashboard/notifications', icon: BellIcon },
-  { name: 'Продукты', href: '/supplier/products', icon: CubeIcon },
-  { name: 'Заказы', href: '/supplier/orders', icon: ShoppingCartIcon },
-  { name: 'Счета', href: '/supplier/invoices', icon: DocumentTextIcon },
   { name: 'Поставки', href: '/supplier/shipments', icon: TruckIcon },
   { name: 'Транзакции', href: '/blockchain/transactions', icon: WalletIcon },
-  { name: 'Контракты', href: '/blockchain/contracts', icon: DocumentDuplicateIcon },
-  { name: 'Кошелек', href: '/blockchain/wallet', icon: WalletIcon },
   { name: 'Профиль', href: '/profile', icon: UserIcon },
   { name: 'Настройки', href: '/settings', icon: CogIcon },
-  { name: 'Безопасность', href: '/security', icon: ShieldCheckIcon },
 ];
 
 const additionalLinks = [

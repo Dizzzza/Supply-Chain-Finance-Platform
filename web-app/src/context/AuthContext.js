@@ -32,6 +32,11 @@ export const AuthProvider = ({ children }) => {
                 localStorage.setItem('token', token);
                 setUser({ token });
                 return { success: true };
+            } else if (response.data.needsVerification) {
+                return {
+                    success: false,
+                    message: 'Пожалуйста, подтвердите свой email перед входом. Проверьте свою почту.'
+                };
             } else {
                 return { 
                     success: false, 

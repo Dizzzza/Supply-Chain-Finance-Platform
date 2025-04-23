@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [isVerificationError, setIsVerificationError] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -19,15 +21,30 @@ const Login = () => {
     }));
   };
 
+  const handleResendVerification = async () => {
+    try {
+      await axios.post('http://localhost:3003/auth/resend-verification', {
+        username: formData.username
+      });
+      setError('Письмо с подтверждением отправлено повторно. Пожалуйста, проверьте вашу почту.');
+    } catch (err) {
+      setError('Ошибка при отправке письма подтверждения.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setIsVerificationError(false);
 
     try {
       const result = await login(formData.username, formData.password);
       if (result.success) {
         navigate('/dashboard');
       } else {
+        if (result.message.includes('подтвердите свой email')) {
+          setIsVerificationError(true);
+        }
         setError(result.message);
       }
     } catch (err) {
@@ -44,8 +61,16 @@ const Login = () => {
           </h2>
         </div>
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <div className={`${isVerificationError ? 'bg-yellow-100 border-yellow-400 text-yellow-700' : 'bg-red-100 border-red-400 text-red-700'} px-4 py-3 rounded relative border`} role="alert">
             <span className="block sm:inline">{error}</span>
+            {isVerificationError && (
+              <button
+                onClick={handleResendVerification}
+                className="mt-2 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+              >
+                Отправить письмо подтверждения повторно
+              </button>
+            )}
           </div>
         )}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

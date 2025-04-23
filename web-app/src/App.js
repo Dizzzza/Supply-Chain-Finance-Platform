@@ -12,15 +12,11 @@ import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './pages/dashboard/Dashboard';
-import Notifications from './pages/dashboard/Notifications';
 import Profile from './pages/profile/Profile';
 import Settings from './pages/settings/Settings';
-import Security from './pages/security/Security';
 
 // Blockchain pages
 import Transactions from './pages/blockchain/Transactions';
-import Contracts from './pages/blockchain/Contracts';
-import Wallet from './pages/blockchain/Wallet';
 
 // Additional pages
 import About from './pages/about/About';
@@ -29,15 +25,7 @@ import Terms from './pages/terms/Terms';
 import Privacy from './pages/privacy/Privacy';
 
 // Supplier pages
-import Products from './pages/supplier/Products';
-import Orders from './pages/supplier/Orders';
-import Invoices from './pages/supplier/Invoices';
 import Shipments from './pages/supplier/Shipments';
-
-// Buyer pages
-import BuyerOrders from './pages/buyer/Orders';
-import BuyerInvoices from './pages/buyer/Invoices';
-import BuyerShipments from './pages/buyer/Shipments';
 
 function App() {
   return (
@@ -57,11 +45,6 @@ function App() {
                     <Dashboard />
                   </ProtectedRoute>
                 } />
-                <Route path="dashboard/notifications" element={
-                  <ProtectedRoute>
-                    <Notifications />
-                  </ProtectedRoute>
-                } />
                 <Route path="profile" element={
                   <ProtectedRoute>
                     <Profile />
@@ -72,26 +55,11 @@ function App() {
                     <Settings />
                   </ProtectedRoute>
                 } />
-                <Route path="security" element={
-                  <ProtectedRoute>
-                    <Security />
-                  </ProtectedRoute>
-                } />
                 
                 {/* Blockchain routes */}
                 <Route path="blockchain/transactions" element={
                   <ProtectedRoute>
                     <Transactions />
-                  </ProtectedRoute>
-                } />
-                <Route path="blockchain/contracts" element={
-                  <ProtectedRoute>
-                    <Contracts />
-                  </ProtectedRoute>
-                } />
-                <Route path="blockchain/wallet" element={
-                  <ProtectedRoute>
-                    <Wallet />
                   </ProtectedRoute>
                 } />
 
@@ -102,41 +70,9 @@ function App() {
                 <Route path="privacy" element={<Privacy />} />
 
                 {/* Supplier routes */}
-                <Route path="supplier/products" element={
-                  <ProtectedRoute>
-                    <Products />
-                  </ProtectedRoute>
-                } />
-                <Route path="supplier/orders" element={
-                  <ProtectedRoute>
-                    <Orders />
-                  </ProtectedRoute>
-                } />
-                <Route path="supplier/invoices" element={
-                  <ProtectedRoute>
-                    <Invoices />
-                  </ProtectedRoute>
-                } />
                 <Route path="supplier/shipments" element={
                   <ProtectedRoute>
                     <Shipments />
-                  </ProtectedRoute>
-                } />
-
-                {/* Buyer routes */}
-                <Route path="buyer/orders" element={
-                  <ProtectedRoute>
-                    <BuyerOrders />
-                  </ProtectedRoute>
-                } />
-                <Route path="buyer/invoices" element={
-                  <ProtectedRoute>
-                    <BuyerInvoices />
-                  </ProtectedRoute>
-                } />
-                <Route path="buyer/shipments" element={
-                  <ProtectedRoute>
-                    <BuyerShipments />
                   </ProtectedRoute>
                 } />
               </Route>
