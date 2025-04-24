@@ -24,19 +24,12 @@ async function getEntities() {
 async function addEntity(type, name, description) {
     const AUTH_TOKEN = process.env.JWT_TOKEN;
 
-    console.log('Sending request to shipment service:', {
-        type,
-        name,
-        description
-    });
-
     try {
         const response = await axios.post(`${SHIPMENT_URL}/createEntity`, { type, name, description }, {
             headers: {
                 Authorization: `Bearer ${AUTH_TOKEN}`
             }
         });
-        console.log('Response from shipment service:', response.data);
         return response.data;
     } catch (error) {
         console.error(`Error adding ${type}:`, error.message);

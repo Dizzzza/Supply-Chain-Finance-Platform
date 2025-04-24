@@ -133,18 +133,18 @@ async function createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmou
 
         const checkResult = await pool.query(checkQuery, [blockchainTxId]);
 
-        console.log(checkResult.rows);
+        console.log('🔍 Проверка существующей транзакции:', checkResult.rows);
 
         if (checkResult.rows.length > 0 ){
-            return 'This tx was processed before'
+            throw new Error('Эта транзакция уже была обработана ранее');
         }
 
         const result = await checkTx(blockchainTxId, trxAmount, usdtAmount);
 
-        console.log(result);
+        console.log('✨ Результат проверки транзакции:', result);
 
         if (result.error) {
-            return result.error
+            throw new Error(result.error);
         }
         
         const transactionQuery = `
@@ -161,20 +161,28 @@ async function createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmou
         ]);
 
         let cryptoToAdd;
-        if(result.currency =='USDT') {
-            cryptoToAdd = (parseFloat(usdtAmount) / TRX_RATE).toFixed(6)
+        if(result.currency == 'USDT') {
+            cryptoToAdd = (parseFloat(usdtAmount) / TRX_RATE).toFixed(6);
         } else {
-            cryptoToAdd = trxAmount
+            cryptoToAdd = trxAmount;
         }
+        
+        console.log('💰 Добавляемая крипто-сумма:', cryptoToAdd);
+        
         const processResult = await processShipment(shipmentId, blockchainTxId, cryptoToAdd, usdtAmount);
 
-        console.log('transactionResult: ', transactionResult.rows[0])
-        return { transaction: transactionResult.rows[0], shipment: processResult }; // Возвращаем созданную запись
+        console.log('📦 Результат обработки поставки:', processResult);
+        
+        return { 
+            success: true, 
+            transaction: transactionResult.rows[0], 
+            shipment: processResult 
+        };
     } catch (error) {
-        console.error('Error creating transaction:', error);
+        console.error('❌ Ошибка при создании транзакции:', error);
         throw error;
     }
-};
+}
 
 const tokenMap = {
     'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t': 'USDT'
@@ -354,13 +362,7 @@ async function getCompaniesAndSuppliers() {
     }
 }
 
-async function createEntity(type, name, description = null) {
-    console.log('Creating entity with data:', {
-        type,
-        name,
-        description
-    });
-
+async function createEntity(type, name, description) {
     // Проверяем допустимость типа
     if (type !== 'company' && type !== 'supplier') {
         throw new Error('Invalid type. Type must be "company" or "supplier".');
@@ -376,9 +378,7 @@ async function createEntity(type, name, description = null) {
 
     try {
         // Выполняем запрос к базе данных
-        console.log('Executing query with params:', [name, description]);
         const result = await pool.query(query, [name, description]);
-        console.log('Query result:', result.rows[0]);
         return result.rows[0]; // Возвращаем созданную запись
     } catch (error) {
         console.error(`Error creating ${type}:`, error);
@@ -465,8 +465,12 @@ async function getShipment(shipmentID) {
         `;
 
         const result = await pool.query(shipmentQuery, [shipmentID]);
-        const shipmentDB = result.rows[0];
+        
+        if (result.rows.length === 0) {
+            throw new Error('Shipment not found');
+        }
 
+        const shipmentDB = result.rows[0];
         const contractData = await contract.getShipment(shipmentDB.uuid);
 
         const transactionQuery = `
@@ -474,7 +478,7 @@ async function getShipment(shipmentID) {
                 *
             FROM transactions
             WHERE shipment_id = $1
-        `
+        `;
 
         const transactionsResult = await pool.query(transactionQuery, [shipmentID]);
 

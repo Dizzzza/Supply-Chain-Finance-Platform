@@ -23,20 +23,23 @@ const Shipments = () => {
   });
   const [stats, setStats] = useState({
     total: 0,
-    inProgress: 0,
-    completed: 0,
-    cancelled: 0
+    created: 0,
+    confirmed: 0
   });
   const [loading, setLoading] = useState({
     entities: false,
     shipments: false,
-    wallet: false
+    wallet: false,
+    details: false
   });
   const [error, setError] = useState({
     entities: null,
     shipments: null,
-    wallet: null
+    wallet: null,
+    details: null
   });
+  const [selectedShipment, setSelectedShipment] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZnJvbnRlbmQiLCJpYXQiOjE3NDUxMzcxMDZ9.GUyvQfstgNuUuD_9WqMMlH6UhbYSUYVbNmlzLm6fJK4');
@@ -75,9 +78,8 @@ const Shipments = () => {
       
       const stats = {
         total: response.data.length,
-        inProgress: response.data.filter(s => s.status === 'InProgress').length,
-        completed: response.data.filter(s => s.status === 'Completed').length,
-        cancelled: response.data.filter(s => s.status === 'Cancelled').length
+        created: response.data.filter(s => !s.init).length,
+        confirmed: response.data.filter(s => s.init).length
       };
       setStats(stats);
     } catch (error) {
@@ -162,16 +164,23 @@ const Shipments = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Started':
+      case 'Created':
         return 'bg-yellow-100 text-yellow-800';
-      case 'InProgress':
-        return 'bg-blue-100 text-blue-800';
-      case 'Completed':
+      case 'Confirmed':
         return 'bg-green-100 text-green-800';
-      case 'Cancelled':
-        return 'bg-red-100 text-red-800';
       default:
         return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'Created':
+        return 'Создано';
+      case 'Confirmed':
+        return 'Подтверждено';
+      default:
+        return status;
     }
   };
 
@@ -227,6 +236,27 @@ const Shipments = () => {
       }));
     } finally {
       setLoading(prev => ({ ...prev, wallet: false }));
+    }
+  };
+
+  const fetchShipmentDetails = async (shipmentId) => {
+    setLoading(prev => ({ ...prev, details: true }));
+    setError(prev => ({ ...prev, details: null }));
+    try {
+      const response = await axios.get(
+        `http://localhost:3003/ship/getShipment/${shipmentId}`,
+        getAuthHeaders()
+      );
+      setSelectedShipment(response.data);
+      setShowDetailsModal(true);
+    } catch (error) {
+      console.error('Ошибка при получении деталей поставки:', error);
+      setError(prev => ({ 
+        ...prev, 
+        details: 'Ошибка при загрузке деталей поставки' 
+      }));
+    } finally {
+      setLoading(prev => ({ ...prev, details: false }));
     }
   };
 
@@ -313,7 +343,7 @@ const Shipments = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -331,12 +361,12 @@ const Shipments = () => {
         <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">В пути</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.inProgress}</p>
+              <p className="text-sm font-medium text-gray-600">Создано</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.created}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <div className="p-3 bg-yellow-100 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
           </div>
@@ -345,26 +375,12 @@ const Shipments = () => {
         <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Доставлено</p>
-              <p className="text-2xl font-bold text-green-600">{stats.completed}</p>
+              <p className="text-sm font-medium text-gray-600">Подтверждено</p>
+              <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">Отменено</p>
-              <p className="text-2xl font-bold text-red-600">{stats.cancelled}</p>
-            </div>
-            <div className="p-3 bg-red-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
           </div>
@@ -383,6 +399,7 @@ const Shipments = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Статус</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Обработчик</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Время создания</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Действия</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -402,7 +419,7 @@ const Shipments = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
-                      {shipment.status}
+                      {getStatusText(shipment.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -410,6 +427,14 @@ const Shipments = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(shipment.created_at)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <button 
+                      className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                      onClick={() => fetchShipmentDetails(shipment.id)}
+                    >
+                      Подробнее
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -589,6 +614,147 @@ const Shipments = () => {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно с деталями поставки */}
+      {showDetailsModal && selectedShipment && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
+          <div className="relative top-20 mx-auto p-5 border w-[800px] shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">
+                  Детали поставки
+                </h3>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="text-gray-400 hover:text-gray-500"
+                >
+                  <span className="text-2xl">&times;</span>
+                </button>
+              </div>
+
+              {error.details && (
+                <div className="mb-4 text-red-600 text-sm p-3 bg-red-50 rounded-md">
+                  {error.details}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Основная информация</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">ID</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.id}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">UUID</p>
+                      <p className="text-sm font-medium break-all">{selectedShipment.database.uuid}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Название</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.shipment_name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Описание</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.shipment_description}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-blue-900 mb-2">Финансовая информация</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-sm text-blue-700">Сумма (FIAT)</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-blue-700">Сумма (Крипто)</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.crypto_amount} TRX</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-green-900 mb-2">Статус</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <p className="text-sm text-green-700">Текущий статус</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.status}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-green-700">Обработчик</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.handler}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-green-700">Инициализация</p>
+                      <p className="text-sm font-medium">{selectedShipment.database.init ? 'Выполнена' : 'Не выполнена'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedShipment.transactions.length > 0 && (
+                  <div className="col-span-2 bg-white border rounded-lg overflow-hidden">
+                    <div className="px-4 py-3 border-b">
+                      <h4 className="text-sm font-medium text-gray-900">История транзакций</h4>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TX Hash</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Сумма</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Токен</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {selectedShipment.transactions.map((tx) => (
+                            <tr key={tx.id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 break-all">{tx.blockchain_tx_id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(tx.created_at)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {selectedShipment.blockchain && (
+                  <div className="col-span-2 bg-purple-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-purple-900 mb-2">Информация из блокчейна</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-purple-700">Владелец</p>
+                        <p className="text-sm font-medium break-all">{selectedShipment.blockchain.owner}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-purple-700">Кошелек доставки</p>
+                        <p className="text-sm font-medium break-all">{selectedShipment.blockchain.deliveryWallet}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm text-purple-700">Хеши транзакций</p>
+                        <div className="space-y-1 mt-1">
+                          {selectedShipment.blockchain.transactionHashs.map((hash, index) => (
+                            <p key={index} className="text-sm font-medium break-all bg-white p-1 rounded">
+                              {hash}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
