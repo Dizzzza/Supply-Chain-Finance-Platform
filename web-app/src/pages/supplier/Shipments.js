@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  BuildingOfficeIcon, 
+  TruckIcon, 
+  CurrencyDollarIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  XMarkIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
+  ChartBarIcon,
+  BuildingStorefrontIcon,
+  CubeTransparentIcon,
+  UsersIcon
+} from '@heroicons/react/24/outline';
 
 const Shipments = () => {
   const [shipments, setShipments] = useState([]);
@@ -260,25 +276,89 @@ const Shipments = () => {
     }
   };
 
+  // Определение анимаций
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const cardVariants = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    },
+    hover: {
+      scale: 1.02,
+      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10
+      }
+    }
+  };
+
+  const tableRowVariants = {
+    initial: { opacity: 0, x: -20 },
+    animate: { 
+      opacity: 1, 
+      x: 0,
+      transition: { type: "spring", stiffness: 100 }
+    },
+    hover: {
+      backgroundColor: "rgba(59, 130, 246, 0.05)",
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      {error.shipments && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error.shipments}
-        </div>
-      )}
-      
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">Управление поставками</h1>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Выберите тип
-              </label>
+    <motion.div 
+      className="container mx-auto px-4 py-8"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <motion.div 
+        className="mb-8"
+        variants={cardVariants}
+      >
+        <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+          <TruckIcon className="h-8 w-8 text-primary-600" />
+          Управление поставками
+        </h1>
+        <p className="text-gray-600">
+          Создавайте и отслеживайте поставки, управляйте транзакциями
+        </p>
+      </motion.div>
+
+      <motion.div 
+        className="bg-white rounded-xl shadow-lg p-6 mb-8"
+        variants={cardVariants}
+        whileHover="hover"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <motion.div whileHover="hover" variants={cardVariants}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Выберите тип
+            </label>
+            <div className="relative">
               <select
-                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors pl-3 pr-10 py-2"
                 value={selectedType}
                 onChange={(e) => {
                   setSelectedType(e.target.value);
@@ -288,106 +368,120 @@ const Shipments = () => {
                 <option value="company">Компания</option>
                 <option value="supplier">Поставщик</option>
               </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                {selectedType === 'company' ? (
+                  <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                ) : (
+                  <BuildingStorefrontIcon className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
-              </label>
+          </motion.div>
+
+          <motion.div whileHover="hover" variants={cardVariants}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
+            </label>
+            <div className="relative">
               <select
-                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-colors"
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 transition-colors pl-3 pr-10 py-2"
                 value={selectedEntityId}
                 onChange={(e) => setSelectedEntityId(e.target.value)}
               >
                 <option value="">
-                  {selectedType === 'company' 
-                    ? '-- Выберите компанию --' 
-                    : '-- Выберите поставщика --'}
+                  {selectedType === 'company' ? '-- Выберите компанию --' : '-- Выберите поставщика --'}
                 </option>
-                {selectedType === 'company'
-                  ? companies.map(company => (
-                      <option key={company.id} value={company.id}>
-                        {company.name}
-                      </option>
-                    ))
-                  : suppliers.map(supplier => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))
-                }
+                {(selectedType === 'company' ? companies : suppliers).map(entity => (
+                  <option key={entity.id} value={entity.id}>{entity.name}</option>
+                ))}
               </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                {loading.entities ? (
+                  <ArrowPathIcon className="h-5 w-5 text-gray-400 animate-spin" />
+                ) : (
+                  <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                )}
+              </div>
             </div>
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <button 
-              onClick={() => setShowWalletsModal(true)}
-              className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
-                <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
-              </svg>
-              Кошельки поставщиков
-            </button>
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Создать поставку
-            </button>
-          </div>
+          </motion.div>
         </div>
-      </div>
+
+        <div className="flex justify-end gap-4">
+          <motion.button 
+            onClick={() => setShowWalletsModal(true)}
+            className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200 flex items-center gap-2 shadow-sm"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <CurrencyDollarIcon className="h-5 w-5" />
+            Кошельки поставщиков
+          </motion.button>
+          <motion.button 
+            onClick={() => setShowCreateModal(true)}
+            className="px-6 py-2.5 rounded-lg bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 flex items-center gap-2 shadow-sm"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <CubeTransparentIcon className="h-5 w-5" />
+            Создать поставку
+          </motion.button>
+        </div>
+      </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+        <motion.div 
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+          variants={cardVariants}
+          whileHover="hover"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Всего поставок</p>
               <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
             <div className="p-3 bg-blue-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
+              <ChartBarIcon className="h-6 w-6 text-blue-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+        <motion.div 
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+          variants={cardVariants}
+          whileHover="hover"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Создано</p>
               <p className="text-2xl font-bold text-yellow-600">{stats.created}</p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
+              <DocumentTextIcon className="h-6 w-6 text-yellow-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow">
+        <motion.div 
+          className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow"
+          variants={cardVariants}
+          whileHover="hover"
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Подтверждено</p>
               <p className="text-2xl font-bold text-green-600">{stats.confirmed}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-full">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <CheckCircleIcon className="h-6 w-6 text-green-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <motion.div 
+        className="bg-white rounded-xl shadow-lg overflow-hidden"
+        variants={cardVariants}
+      >
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -403,304 +497,557 @@ const Shipments = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {shipments.map((shipment) => (
-                <tr key={shipment.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {shipment.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {shipment.shipment_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {shipment.company_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {shipment.supplier_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
-                      {getStatusText(shipment.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {shipment.handler}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(shipment.created_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <button 
-                      className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
-                      onClick={() => fetchShipmentDetails(shipment.id)}
-                    >
-                      Подробнее
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              <AnimatePresence>
+                {shipments.map((shipment) => (
+                  <motion.tr 
+                    key={shipment.id}
+                    variants={tableRowVariants}
+                    initial="initial"
+                    animate="animate"
+                    exit="exit"
+                    whileHover="hover"
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {shipment.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {shipment.shipment_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {shipment.company_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {shipment.supplier_name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(shipment.status)}`}>
+                        {getStatusText(shipment.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {shipment.handler}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatDate(shipment.created_at)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <motion.button 
+                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium flex items-center gap-2"
+                        onClick={() => fetchShipmentDetails(shipment.id)}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <DocumentTextIcon className="h-4 w-4" />
+                        Подробнее
+                      </motion.button>
+                    </td>
+                  </motion.tr>
+                ))}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Создание новой поставки</h3>
+      <AnimatePresence>
+        {showCreateModal && (
+          <motion.div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl p-8 m-4"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <CubeTransparentIcon className="h-6 w-6 text-primary-600" />
+                  Создание поставки
+                </h3>
+                <motion.button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-400 hover:text-gray-500 transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </motion.button>
+              </div>
+
               {error.entities && (
-                <div className="mb-4 text-red-600 text-sm">
-                  {error.entities}
-                </div>
+                <motion.div 
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <ExclamationCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-600">{error.entities}</p>
+                </motion.div>
               )}
-              <form onSubmit={handleCreateShipment}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Компания
-                  </label>
-                  <select
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={formData.companyId}
-                    onChange={(e) => setFormData({...formData, companyId: e.target.value})}
-                    required
-                    disabled={loading.entities}
+
+              <form onSubmit={handleCreateShipment} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <motion.div 
+                    className="space-y-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1 }}
                   >
-                    <option value="">Выберите компанию</option>
-                    {companies.map(company => (
-                      <option key={company.id} value={company.id}>{company.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Поставщик
-                  </label>
-                  <select
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={formData.supplierId}
-                    onChange={(e) => setFormData({...formData, supplierId: e.target.value})}
-                    required
-                    disabled={loading.entities}
+                    <label className="block text-sm font-medium text-gray-700">
+                      Компания
+                    </label>
+                    <div className="relative">
+                      <select
+                        className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                        value={formData.companyId}
+                        onChange={(e) => setFormData({...formData, companyId: e.target.value})}
+                        required
+                        disabled={loading.entities}
+                      >
+                        <option value="">Выберите компанию</option>
+                        {companies.map(company => (
+                          <option key={company.id} value={company.id}>{company.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <motion.div 
+                    className="space-y-2"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 }}
                   >
-                    <option value="">Выберите поставщика</option>
-                    {suppliers.map(supplier => (
-                      <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
-                    ))}
-                  </select>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Поставщик
+                    </label>
+                    <div className="relative">
+                      <select
+                        className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                        value={formData.supplierId}
+                        onChange={(e) => setFormData({...formData, supplierId: e.target.value})}
+                        required
+                        disabled={loading.entities}
+                      >
+                        <option value="">Выберите поставщика</option>
+                        {suppliers.map(supplier => (
+                          <option key={supplier.id} value={supplier.id}>{supplier.name}</option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-400" />
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700">
                     Сумма (USD)
                   </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    value={formData.fiatAmount}
-                    onChange={(e) => setFormData({...formData, fiatAmount: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                      value={formData.fiatAmount}
+                      onChange={(e) => setFormData({...formData, fiatAmount: e.target.value})}
+                      required
+                    />
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                      <CurrencyDollarIcon className="h-5 w-5 text-gray-400" />
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700">
                     Название
                   </label>
                   <input
                     type="text"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="block w-full px-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                     required
                   />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                </motion.div>
+
+                <motion.div 
+                  className="space-y-2"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 }}
+                >
+                  <label className="block text-sm font-medium text-gray-700">
                     Описание
                   </label>
                   <textarea
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="block w-full px-3 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200 min-h-[100px]"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
                     required
                   />
-                </div>
-                <div className="flex justify-end">
-                  <button
+                </motion.div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <motion.button
                     type="button"
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2"
+                    className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
                     onClick={() => setShowCreateModal(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Отмена
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="px-4 py-2.5 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Создать
-                  </button>
+                  </motion.button>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {showWalletsModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-[600px] shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
+      <AnimatePresence>
+        {showWalletsModal && (
+          <motion.div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 m-4"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <CurrencyDollarIcon className="h-6 w-6 text-primary-600" />
                   Кошельки поставщиков
                 </h3>
-                <button
+                <motion.button
                   onClick={() => setShowWalletsModal(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-400 hover:text-gray-500 transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <span className="text-2xl">&times;</span>
-                </button>
+                  <XMarkIcon className="h-6 w-6" />
+                </motion.button>
               </div>
-              
+
               {error.wallet && (
-                <div className="mb-4 text-red-600 text-sm">
-                  {error.wallet}
-                </div>
+                <motion.div 
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <ExclamationCircleIcon className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-600">{error.wallet}</p>
+                </motion.div>
               )}
 
-              {suppliers.map(supplier => (
-                <div key={supplier.id} className="mb-4 p-4 border rounded-lg">
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="text-gray-700 font-bold">
-                      {supplier.name}
-                    </label>
-                    {editingWallet !== supplier.id && (
-                      <button
-                        onClick={() => handleEditClick(supplier.id)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>
-                      </button>
-                    )}
-                  </div>
-                  {editingWallet === supplier.id ? (
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        className="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Адрес кошелька"
-                        value={tempWalletAddress}
-                        onChange={(e) => setTempWalletAddress(e.target.value)}
-                      />
-                      <button
-                        onClick={() => handleWalletSubmit(supplier.id)}
-                        disabled={loading.wallet}
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-green-300"
-                      >
-                        {loading.wallet ? 'Сохранение...' : 'Сохранить'}
-                      </button>
-                      <button
-                        onClick={() => setEditingWallet(null)}
-                        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                      >
-                        Отмена
-                      </button>
+              <div className="space-y-4">
+                {suppliers.map((supplier, index) => (
+                  <motion.div 
+                    key={supplier.id} 
+                    className="p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-primary-200 transition-colors"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="flex items-center gap-2">
+                        <BuildingStorefrontIcon className="h-5 w-5 text-gray-500" />
+                        <h4 className="text-lg font-medium text-gray-900">
+                          {supplier.name}
+                        </h4>
+                      </div>
+                      {editingWallet !== supplier.id && (
+                        <motion.button
+                          onClick={() => handleEditClick(supplier.id)}
+                          className="text-primary-600 hover:text-primary-700 transition-colors"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                          </svg>
+                        </motion.button>
+                      )}
                     </div>
-                  ) : (
-                    <div className="text-gray-600 break-all">
-                      {walletAddresses[supplier.id] || 'Адрес не указан'}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Модальное окно с деталями поставки */}
-      {showDetailsModal && selectedShipment && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-[800px] shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
-                  Детали поставки
-                </h3>
-                <button
+                    {editingWallet === supplier.id ? (
+                      <motion.div 
+                        className="flex gap-3"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        <input
+                          type="text"
+                          className="flex-1 px-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                          placeholder="Введите адрес кошелька"
+                          value={tempWalletAddress}
+                          onChange={(e) => setTempWalletAddress(e.target.value)}
+                        />
+                        <motion.button
+                          onClick={() => handleWalletSubmit(supplier.id)}
+                          disabled={loading.wallet}
+                          className="px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-green-400 transition-colors flex items-center gap-2"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          {loading.wallet ? (
+                            <>
+                              <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                              Сохранение...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircleIcon className="h-4 w-4" />
+                              Сохранить
+                            </>
+                          )}
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setEditingWallet(null)}
+                          className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center gap-2"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <XMarkIcon className="h-4 w-4" />
+                          Отмена
+                        </motion.button>
+                      </motion.div>
+                    ) : (
+                      <div className="bg-white p-3 rounded-lg border border-gray-200">
+                        <p className="text-sm text-gray-500 mb-1">Адрес кошелька:</p>
+                        <p className="text-sm font-mono break-all text-gray-900">
+                          {walletAddresses[supplier.id] || 'Адрес не указан'}
+                        </p>
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDetailsModal && selectedShipment && (
+          <motion.div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-start justify-center pt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowDetailsModal(false);
+              }
+            }}
+          >
+            <motion.div 
+              className="relative mx-auto w-full max-w-5xl bg-white rounded-2xl shadow-xl m-4"
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+            >
+              {/* Заголовок */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <DocumentTextIcon className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Поставка #{selectedShipment.database.id}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Создана {formatDate(selectedShipment.database.created_at)}
+                    </p>
+                  </div>
+                </div>
+                <motion.button
                   onClick={() => setShowDetailsModal(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                 >
-                  <span className="text-2xl">&times;</span>
-                </button>
+                  <XMarkIcon className="h-6 w-6 text-gray-400" />
+                </motion.button>
               </div>
 
-              {error.details && (
-                <div className="mb-4 text-red-600 text-sm p-3 bg-red-50 rounded-md">
-                  {error.details}
-                </div>
-              )}
+              <div className="p-6">
+                <div className="grid grid-cols-3 gap-6">
+                  {/* Левая колонка */}
+                  <div className="col-span-2 space-y-6">
+                    {/* Основная информация */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200">
+                        <h4 className="text-base font-medium text-gray-900 flex items-center gap-2">
+                          <CubeTransparentIcon className="h-5 w-5 text-blue-600" />
+                          Основная информация
+                        </h4>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Название</p>
+                          <p className="text-base font-medium text-gray-900">
+                            {selectedShipment.database.shipment_name}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">UUID</p>
+                          <p className="text-sm font-mono text-gray-900 break-all bg-gray-50 p-2 rounded">
+                            {selectedShipment.database.uuid}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Описание</p>
+                          <p className="text-base text-gray-900">
+                            {selectedShipment.database.shipment_description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="col-span-2 bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Основная информация</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">ID</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.id}</p>
+                    {/* Участники */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200">
+                        <h4 className="text-base font-medium text-gray-900 flex items-center gap-2">
+                          <UsersIcon className="h-5 w-5 text-blue-600" />
+                          Участники
+                        </h4>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-gray-50 rounded-lg">
+                            <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Компания</p>
+                            <p className="text-base font-medium text-gray-900">
+                              {selectedShipment.database.company_name}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="p-2 bg-gray-50 rounded-lg">
+                            <BuildingStorefrontIcon className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">Поставщик</p>
+                            <p className="text-base font-medium text-gray-900">
+                              {selectedShipment.database.supplier_name}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">UUID</p>
-                      <p className="text-sm font-medium break-all">{selectedShipment.database.uuid}</p>
+                  </div>
+
+                  {/* Правая колонка */}
+                  <div className="space-y-6">
+                    {/* Статус */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200">
+                        <h4 className="text-base font-medium text-gray-900 flex items-center gap-2">
+                          <ChartBarIcon className="h-5 w-5 text-blue-600" />
+                          Статус
+                        </h4>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Текущий статус</p>
+                          <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(selectedShipment.database.status)}`}>
+                            {getStatusText(selectedShipment.database.status)}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Обработчик</p>
+                          <p className="text-base font-medium text-gray-900">
+                            {selectedShipment.database.handler}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-gray-500 mb-1">Инициализация</p>
+                          <span className={`inline-flex px-3 py-1 text-sm font-medium rounded-full ${selectedShipment.database.init ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                            {selectedShipment.database.init ? 'Выполнена' : 'Не выполнена'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Название</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.shipment_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Описание</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.shipment_description}</p>
+
+                    {/* Финансы */}
+                    <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-200">
+                        <h4 className="text-base font-medium text-gray-900 flex items-center gap-2">
+                          <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
+                          Финансы
+                        </h4>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div className="bg-blue-50 rounded-lg p-4">
+                          <p className="text-sm text-gray-500 mb-2">FIAT</p>
+                          <div className="flex items-baseline">
+                            <span className="text-2xl font-bold text-gray-900">
+                              {selectedShipment.database.fiat_amount}
+                            </span>
+                            <span className="ml-2 text-sm text-gray-500">
+                              {selectedShipment.database.fiat_currency}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bg-purple-50 rounded-lg p-4">
+                          <p className="text-sm text-gray-500 mb-2">Крипто</p>
+                          <div className="flex items-baseline">
+                            <span className="text-2xl font-bold text-gray-900">
+                              {selectedShipment.database.crypto_amount}
+                            </span>
+                            <span className="ml-2 text-sm text-gray-500">TRX</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-blue-900 mb-2">Финансовая информация</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-blue-700">Сумма (FIAT)</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-blue-700">Сумма (Крипто)</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.crypto_amount} TRX</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-green-900 mb-2">Статус</h4>
-                  <div className="space-y-2">
-                    <div>
-                      <p className="text-sm text-green-700">Текущий статус</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.status}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-green-700">Обработчик</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.handler}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-green-700">Инициализация</p>
-                      <p className="text-sm font-medium">{selectedShipment.database.init ? 'Выполнена' : 'Не выполнена'}</p>
-                    </div>
-                  </div>
-                </div>
-
+                {/* История транзакций */}
                 {selectedShipment.transactions.length > 0 && (
-                  <div className="col-span-2 bg-white border rounded-lg overflow-hidden">
-                    <div className="px-4 py-3 border-b">
-                      <h4 className="text-sm font-medium text-gray-900">История транзакций</h4>
+                  <div className="mt-6 bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <div className="px-6 py-4 border-b border-gray-200">
+                      <h4 className="text-base font-medium text-gray-900 flex items-center gap-2">
+                        <ClockIcon className="h-5 w-5 text-blue-600" />
+                        История транзакций
+                      </h4>
                     </div>
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -710,56 +1057,46 @@ const Shipments = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">TX Hash</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Сумма</th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Токен</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Дата</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200">
                           {selectedShipment.transactions.map((tx) => (
-                            <tr key={tx.id}>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 break-all">{tx.blockchain_tx_id}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(tx.created_at)}</td>
-                            </tr>
+                            <motion.tr 
+                              key={tx.id}
+                              className="hover:bg-gray-50 transition-colors"
+                              whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.05)" }}
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                {tx.id}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-mono text-gray-500 break-all">
+                                  {tx.blockchain_tx_id}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {tx.amount}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                  {tx.token_name}
+                                </span>
+                              </td>
+                            </motion.tr>
                           ))}
                         </tbody>
                       </table>
                     </div>
                   </div>
                 )}
-
-                {selectedShipment.blockchain && (
-                  <div className="col-span-2 bg-purple-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-purple-900 mb-2">Информация из блокчейна</h4>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-purple-700">Владелец</p>
-                        <p className="text-sm font-medium break-all">{selectedShipment.blockchain.owner}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-purple-700">Кошелек доставки</p>
-                        <p className="text-sm font-medium break-all">{selectedShipment.blockchain.deliveryWallet}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm text-purple-700">Хеши транзакций</p>
-                        <div className="space-y-1 mt-1">
-                          {selectedShipment.blockchain.transactionHashs.map((hash, index) => (
-                            <p key={index} className="text-sm font-medium break-all bg-white p-1 rounded">
-                              {hash}
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

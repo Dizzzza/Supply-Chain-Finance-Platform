@@ -13,7 +13,6 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import Dashboard from './pages/dashboard/Dashboard';
 import Profile from './pages/profile/Profile';
-import Settings from './pages/settings/Settings';
 
 // Blockchain pages
 import Transactions from './pages/blockchain/Transactions';
@@ -48,11 +47,6 @@ function App() {
                 <Route path="profile" element={
                   <ProtectedRoute>
                     <Profile />
-                  </ProtectedRoute>
-                } />
-                <Route path="settings" element={
-                  <ProtectedRoute>
-                    <Settings />
                   </ProtectedRoute>
                 } />
                 

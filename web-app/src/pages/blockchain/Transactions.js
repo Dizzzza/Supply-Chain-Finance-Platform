@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import { 
+  BuildingOfficeIcon, 
+  TruckIcon, 
+  CurrencyDollarIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  XMarkIcon,
+  ArrowPathIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon
+} from '@heroicons/react/24/outline';
 
 const Transactions = () => {
   const [selectedType, setSelectedType] = useState('company');
@@ -202,171 +214,358 @@ const Transactions = () => {
     });
   };
 
+  // Анимации
+  const pageVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        staggerChildren: 0.1
+      }
+    },
+    exit: { opacity: 0, y: -20 }
+  };
+
+  const cardVariants = {
+    initial: { opacity: 0, scale: 0.95 },
+    animate: { 
+      opacity: 1, 
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    },
+    hover: {
+      scale: 1.02,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10
+      }
+    }
+  };
+
+  const tableRowVariants = {
+    initial: { opacity: 0, x: -20 },
+    animate: { 
+      opacity: 1, 
+      x: 0,
+      transition: { type: "spring", stiffness: 100 }
+    },
+    hover: {
+      backgroundColor: "rgba(59, 130, 246, 0.05)",
+      transition: { duration: 0.2 }
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 sm:px-0">
-        <h2 className="text-2xl font-bold text-gray-900">Транзакции</h2>
+    <motion.div 
+      className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8"
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <motion.div 
+        className="px-4 sm:px-0"
+        variants={cardVariants}
+      >
+        <h2 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+          <CurrencyDollarIcon className="h-8 w-8 text-primary-600" />
+          Транзакции
+        </h2>
         <p className="mt-2 text-sm text-gray-600">
-          Управление транзакциями в блокчейне
+          Управление транзакциями в блокчейне и отслеживание платежей
         </p>
-      </div>
+      </motion.div>
 
-      <div className="mt-6 bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Выберите тип
-            </label>
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-              value={selectedType}
-              onChange={(e) => {
-                setSelectedType(e.target.value);
-                setSelectedEntityId('');
-                setSelectedShipmentId('');
-                setSelectedShipment(null);
-              }}
-            >
-              <option value="company">Компания</option>
-              <option value="supplier">Поставщик</option>
-            </select>
-          </div>
+      <motion.div 
+        className="mt-6 bg-white shadow-lg rounded-xl overflow-hidden"
+        variants={cardVariants}
+      >
+        <div className="px-6 py-5">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <motion.div whileHover="hover" variants={cardVariants}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Выберите тип
+              </label>
+              <div className="relative">
+                <select
+                  className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                  value={selectedType}
+                  onChange={(e) => {
+                    setSelectedType(e.target.value);
+                    setSelectedEntityId('');
+                    setSelectedShipmentId('');
+                    setSelectedShipment(null);
+                  }}
+                >
+                  <option value="company">Компания</option>
+                  <option value="supplier">Поставщик</option>
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            </motion.div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
-            </label>
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-              value={selectedEntityId}
-              onChange={(e) => {
-                setSelectedEntityId(e.target.value);
-                setSelectedShipmentId('');
-                setSelectedShipment(null);
-              }}
-            >
-              <option value="">Выберите...</option>
-              {(selectedType === 'company' ? companies : suppliers).map(entity => (
-                <option key={entity.id} value={entity.id}>{entity.name}</option>
-              ))}
-            </select>
-          </div>
+            <motion.div whileHover="hover" variants={cardVariants}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
+              </label>
+              <div className="relative">
+                <select
+                  className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                  value={selectedEntityId}
+                  onChange={(e) => {
+                    setSelectedEntityId(e.target.value);
+                    setSelectedShipmentId('');
+                    setSelectedShipment(null);
+                  }}
+                  disabled={loading.entities}
+                >
+                  <option value="">Выберите...</option>
+                  {(selectedType === 'company' ? companies : suppliers).map(entity => (
+                    <option key={entity.id} value={entity.id}>{entity.name}</option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  {loading.entities ? (
+                    <ArrowPathIcon className="h-5 w-5 text-gray-400 animate-spin" />
+                  ) : (
+                    <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+              </div>
+            </motion.div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Выберите поставку
-            </label>
-            <select
-              className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md"
-              value={selectedShipmentId}
-              onChange={(e) => setSelectedShipmentId(e.target.value)}
-            >
-              <option value="">Выберите поставку</option>
-              {shipments.map(shipment => (
-                <option key={shipment.id} value={shipment.id}>
-                  {shipment.shipment_name}
-                </option>
-              ))}
-            </select>
+            <motion.div whileHover="hover" variants={cardVariants}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Выберите поставку
+              </label>
+              <div className="relative">
+                <select
+                  className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
+                  value={selectedShipmentId}
+                  onChange={(e) => setSelectedShipmentId(e.target.value)}
+                  disabled={loading.shipments || !selectedEntityId}
+                >
+                  <option value="">Выберите поставку</option>
+                  {shipments.map(shipment => (
+                    <option key={shipment.id} value={shipment.id}>
+                      {shipment.shipment_name}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                  {loading.shipments ? (
+                    <ArrowPathIcon className="h-5 w-5 text-gray-400 animate-spin" />
+                  ) : (
+                    <TruckIcon className="h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {selectedShipment && (
-        <div className="mt-6 bg-white shadow sm:rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">
-              Детали поставки
-            </h3>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <p className="text-sm font-medium text-gray-500">ID поставки</p>
-                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.id}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">UUID</p>
-                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.uuid}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Сумма (USDT)</p>
-                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Сумма (TRX)</p>
-                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.crypto_amount} TRX</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Статус инициализации</p>
-                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.init ? 'Инициализирована' : 'Не инициализирована'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Дата создания</p>
-                <p className="mt-1 text-sm text-gray-900">{formatDate(selectedShipment.database.created_at)}</p>
-              </div>
-            </div>
-
-            {!selectedShipment.database.init && (
-              <div className="mt-5">
-                <button
-                  onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      <AnimatePresence mode="wait">
+        {selectedShipment && (
+          <motion.div 
+            className="mt-6 bg-white shadow-lg rounded-xl overflow-hidden"
+            variants={cardVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+          >
+            <div className="px-6 py-5">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 flex items-center gap-2">
+                <DocumentTextIcon className="h-5 w-5 text-primary-600" />
+                Детали поставки
+              </h3>
+              <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
                 >
-                  Создать транзакцию
+                  <p className="text-sm font-medium text-gray-500">ID поставки</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.id}</p>
+                </motion.div>
+
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
+                >
+                  <p className="text-sm font-medium text-gray-500">UUID</p>
+                  <p className="mt-1 text-sm text-gray-900 break-all">{selectedShipment.database.uuid}</p>
+                </motion.div>
+
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
+                >
+                  <p className="text-sm font-medium text-gray-500">Сумма (USDT)</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
+                </motion.div>
+
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
+                >
+                  <p className="text-sm font-medium text-gray-500">Сумма (TRX)</p>
+                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.crypto_amount} TRX</p>
+                </motion.div>
+
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
+                >
+                  <p className="text-sm font-medium text-gray-500">Статус инициализации</p>
+                  <div className="mt-1 flex items-center">
+                    {selectedShipment.database.init ? (
+                      <CheckCircleIcon className="h-5 w-5 text-green-500 mr-1" />
+                    ) : (
+                      <ExclamationCircleIcon className="h-5 w-5 text-yellow-500 mr-1" />
+                    )}
+                    <span className="text-sm text-gray-900">
+                      {selectedShipment.database.init ? 'Инициализирована' : 'Не инициализирована'}
+                    </span>
+                  </div>
+                </motion.div>
+
+                <motion.div 
+                  className="bg-gray-50 rounded-lg p-4"
+                  variants={cardVariants}
+                  whileHover="hover"
+                >
+                  <p className="text-sm font-medium text-gray-500">Дата создания</p>
+                  <div className="mt-1 flex items-center">
+                    <ClockIcon className="h-5 w-5 text-gray-400 mr-1" />
+                    <span className="text-sm text-gray-900">{formatDate(selectedShipment.database.created_at)}</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              {!selectedShipment.database.init && (
+                <motion.div 
+                  className="mt-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <motion.button
+                    onClick={() => setShowCreateModal(true)}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Создать транзакцию
+                  </motion.button>
+                </motion.div>
+              )}
+
+              {selectedShipment.transactions.length > 0 && (
+                <motion.div 
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">История транзакций</h4>
+                  <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TX Hash</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Токен</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <AnimatePresence>
+                          {selectedShipment.transactions.map((tx) => (
+                            <motion.tr 
+                              key={tx.id}
+                              variants={tableRowVariants}
+                              initial="initial"
+                              animate="animate"
+                              exit="exit"
+                              whileHover="hover"
+                              className="hover:bg-gray-50 transition-colors duration-150"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{tx.blockchain_tx_id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
+                            </motion.tr>
+                          ))}
+                        </AnimatePresence>
+                      </tbody>
+                    </table>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showCreateModal && selectedShipment && (
+          <motion.div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="relative p-6 bg-white w-full max-w-md m-auto rounded-xl shadow-xl"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Создание новой транзакции
+                </h3>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-gray-400 hover:text-gray-500 transition-colors"
+                >
+                  <XMarkIcon className="h-6 w-6" />
                 </button>
               </div>
-            )}
 
-            {selectedShipment.transactions.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-lg font-medium text-gray-900">История транзакций</h4>
-                <div className="mt-4 overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TX Hash</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Токен</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {selectedShipment.transactions.map((tx) => (
-                        <tr key={tx.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.blockchain_tx_id}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showCreateModal && selectedShipment && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-                Создание новой транзакции
-              </h3>
               {error.transaction && (
-                <div className="mb-4 text-red-600 text-sm p-3 bg-red-50 rounded-md">
-                  {error.transaction}
-                </div>
+                <motion.div 
+                  className="mb-4 text-red-600 text-sm p-4 bg-red-50 rounded-lg flex items-start"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <ExclamationCircleIcon className="h-5 w-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+                  <span>{error.transaction}</span>
+                </motion.div>
               )}
+
               <form onSubmit={handleCreateTransaction}>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     ID транзакции в блокчейне
                   </label>
                   <input
                     type="text"
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
                     value={transactionData.blockchainTxId}
                     onChange={(e) => setTransactionData({
                       ...transactionData,
@@ -375,50 +574,76 @@ const Transactions = () => {
                     required
                   />
                 </div>
-                <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                  <h4 className="text-sm font-medium text-blue-900 mb-2">Информация о платеже</h4>
-                  <p className="text-sm text-blue-800">
-                    Отправьте указанную сумму на следующий кошелек:
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1 break-all font-mono bg-white p-2 rounded">
-                    {paymentInfo?.payWallet || 'Адрес кошелька не найден'}
-                  </p>
-                  <div className="mt-3 space-y-1">
-                    <p className="text-sm text-blue-800">
-                      Сумма TRX: <span className="font-medium">{paymentInfo?.sendTrxSumm || selectedShipment.database.crypto_amount}</span>
-                    </p>
-                    <p className="text-sm text-blue-800">
-                      Сумма USDT: <span className="font-medium">{paymentInfo?.sendUsdtSumm || selectedShipment.database.fiat_amount}</span>
-                    </p>
+
+                <motion.div 
+                  className="mb-6 p-4 bg-blue-50 rounded-lg"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <h4 className="text-sm font-medium text-blue-900 mb-3">Информация о платеже</h4>
+                  <div className="space-y-3">
+                    <div className="bg-white p-3 rounded-md">
+                      <p className="text-sm text-blue-800 mb-2">Адрес кошелька для оплаты:</p>
+                      <p className="text-xs font-mono break-all bg-blue-50 p-2 rounded">
+                        {paymentInfo?.payWallet || 'Адрес кошелька не найден'}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-white p-3 rounded-md">
+                        <p className="text-sm text-blue-800">Сумма TRX</p>
+                        <p className="text-sm font-medium">
+                          {paymentInfo?.sendTrxSumm || selectedShipment.database.crypto_amount}
+                        </p>
+                      </div>
+                      <div className="bg-white p-3 rounded-md">
+                        <p className="text-sm text-blue-800">Сумма USDT</p>
+                        <p className="text-sm font-medium">
+                          {paymentInfo?.sendUsdtSumm || selectedShipment.database.fiat_amount}
+                        </p>
+                      </div>
+                    </div>
+                    {paymentInfo && (
+                      <p className="text-xs text-blue-700 mt-2">
+                        {paymentInfo.message}
+                      </p>
+                    )}
                   </div>
-                  {paymentInfo && (
-                    <p className="mt-2 text-xs text-blue-700">
-                      {paymentInfo.message}
-                    </p>
-                  )}
-                </div>
-                <div className="flex justify-end">
-                  <button
+                </motion.div>
+
+                <div className="flex justify-end gap-3">
+                  <motion.button
                     type="button"
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
                     onClick={() => setShowCreateModal(false)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     Отмена
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                    className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
                     disabled={loading.transaction}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    {loading.transaction ? 'Создание...' : 'Создать'}
-                  </button>
+                    {loading.transaction ? (
+                      <span className="flex items-center">
+                        <ArrowPathIcon className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                        Создание...
+                      </span>
+                    ) : (
+                      'Создать'
+                    )}
+                  </motion.button>
                 </div>
               </form>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 

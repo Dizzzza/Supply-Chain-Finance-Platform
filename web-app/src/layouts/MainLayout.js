@@ -8,15 +8,23 @@ const MainLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 bg-gray-100">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <Outlet />
+      <div className="flex-1 flex bg-gray-100">
+        <div className="flex-1 flex">
+          {/* Контейнер для сайдбара и основного контента */}
+          <div className="flex-1 flex gap-6 px-4 sm:px-6 lg:px-8 pt-6">
+            {/* Сайдбар */}
+            <div className="w-64 flex-shrink-0">
+              <div className="sticky top-6">
+                <Sidebar />
+              </div>
             </div>
+            
+            {/* Основной контент */}
+            <main className="flex-1">
+              <Outlet />
+            </main>
           </div>
-        </main>
+        </div>
       </div>
       <Footer />
     </div>

@@ -1,98 +1,196 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  DocumentTextIcon,
+  UserGroupIcon,
+  ShieldCheckIcon,
+  CurrencyDollarIcon,
+  ExclamationTriangleIcon,
+  ArrowPathIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon,
+  UserIcon,
+  KeyIcon,
+  BanknotesIcon
+} from '@heroicons/react/24/outline';
 
 const Terms = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
+  const sections = [
+    {
+      title: "Общие положения",
+      icon: <DocumentTextIcon className="h-8 w-8 text-primary-600" />,
+      content: "Настоящие Условия использования регулируют отношения между платформой SupplyChain Finance (далее - 'Платформа') и пользователями платформы (далее - 'Пользователи')."
+    },
+    {
+      title: "Регистрация и использование платформы",
+      icon: <UserGroupIcon className="h-8 w-8 text-primary-600" />,
+      content: "Для использования платформы необходимо пройти процедуру регистрации. Пользователь обязуется предоставить достоверную информацию при регистрации и поддерживать её актуальность.",
+      items: [
+        "Пользователь должен быть не младше 18 лет",
+        "Пользователь должен иметь право заключать юридически обязывающие соглашения",
+        "Регистрация компании должна быть подтверждена соответствующими документами"
+      ]
+    },
+    {
+      title: "Безопасность и конфиденциальность",
+      icon: <ShieldCheckIcon className="h-8 w-8 text-primary-600" />,
+      content: "Пользователь обязуется обеспечить безопасность своей учетной записи:",
+      items: [
+        "Хранить в тайне свои учетные данные",
+        "Использовать надежные пароли",
+        "Немедленно сообщать о подозрительной активности"
+      ]
+    },
+    {
+      title: "Финансовые операции",
+      icon: <CurrencyDollarIcon className="h-8 w-8 text-primary-600" />,
+      content: "Все финансовые операции на платформе проводятся через смарт-контракты:",
+      items: [
+        "Транзакции являются необратимыми",
+        "Комиссии указываются до проведения операции",
+        "Пользователь несет ответственность за правильность указания реквизитов"
+      ]
+    },
+    {
+      title: "Ответственность сторон",
+      icon: <ExclamationTriangleIcon className="h-8 w-8 text-primary-600" />,
+      content: "Платформа не несет ответственности за:",
+      items: [
+        "Действия третьих лиц",
+        "Технические сбои вне нашего контроля",
+        "Упущенную выгоду пользователей"
+      ]
+    }
+  ];
+
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <div className="text-center">
-        <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+    <motion.div
+      className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.div
+        className="text-center"
+        variants={sectionVariants}
+      >
+        <div className="flex justify-center mb-6">
+          <DocumentTextIcon className="h-16 w-16 text-primary-600" />
+        </div>
+        <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl mb-4">
           Условия использования
         </h2>
-        <p className="mt-4 text-xl text-gray-500">
-          Пожалуйста, внимательно ознакомьтесь с условиями использования платформы
+        <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+          Ознакомьтесь с правилами и условиями использования нашей платформы
         </p>
+      </motion.div>
+
+      <div className="mt-16 grid grid-cols-1 gap-8">
+        {sections.map((section, index) => (
+          <motion.div
+            key={section.title}
+            className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow"
+            variants={sectionVariants}
+          >
+            <div className="flex items-center gap-4 mb-6">
+              {section.icon}
+              <h3 className="text-2xl font-bold text-gray-900">
+                {section.title}
+              </h3>
+            </div>
+            <p className="text-gray-600 mb-6">
+              {section.content}
+            </p>
+            {section.items && (
+              <ul className="space-y-4">
+                {section.items.map((item, itemIndex) => (
+                  <motion.li
+                    key={itemIndex}
+                    className="flex items-start gap-3 text-gray-600"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 + itemIndex * 0.05 }}
+                  >
+                    <div className="h-2 w-2 rounded-full bg-primary-500 mt-2 flex-shrink-0" />
+                    {item}
+                  </motion.li>
+                ))}
+              </ul>
+            )}
+          </motion.div>
+        ))}
       </div>
 
-      <div className="mt-16 prose prose-lg mx-auto">
-        <section>
-          <h3>1. Общие положения</h3>
-          <p>
-            Настоящие Условия использования регулируют отношения между платформой SupplyChain Finance 
-            (далее - "Платформа") и пользователями платформы (далее - "Пользователи").
-          </p>
-        </section>
+      <motion.div
+        className="mt-16 bg-white rounded-2xl shadow-lg p-8"
+        variants={sectionVariants}
+      >
+        <div className="flex items-center gap-4 mb-6">
+          <ArrowPathIcon className="h-8 w-8 text-primary-600" />
+          <h3 className="text-2xl font-bold text-gray-900">
+            Изменение условий
+          </h3>
+        </div>
+        <p className="text-gray-600">
+          Платформа оставляет за собой право изменять настоящие условия использования.
+          Пользователи будут уведомлены о существенных изменениях через электронную почту
+          или уведомления на платформе.
+        </p>
+      </motion.div>
 
-        <section className="mt-12">
-          <h3>2. Регистрация и использование платформы</h3>
-          <p>
-            Для использования платформы необходимо пройти процедуру регистрации. 
-            Пользователь обязуется предоставить достоверную информацию при регистрации 
-            и поддерживать её актуальность.
-          </p>
-          <ul className="list-disc pl-6 mt-4">
-            <li>Пользователь должен быть не младше 18 лет</li>
-            <li>Пользователь должен иметь право заключать юридически обязывающие соглашения</li>
-            <li>Регистрация компании должна быть подтверждена соответствующими документами</li>
-          </ul>
-        </section>
-
-        <section className="mt-12">
-          <h3>3. Безопасность и конфиденциальность</h3>
-          <p>
-            Пользователь обязуется обеспечить безопасность своей учетной записи:
-          </p>
-          <ul className="list-disc pl-6 mt-4">
-            <li>Хранить в тайне свои учетные данные</li>
-            <li>Использовать надежные пароли</li>
-            <li>Немедленно сообщать о подозрительной активности</li>
-          </ul>
-        </section>
-
-        <section className="mt-12">
-          <h3>4. Финансовые операции</h3>
-          <p>
-            Все финансовые операции на платформе проводятся через смарт-контракты:
-          </p>
-          <ul className="list-disc pl-6 mt-4">
-            <li>Транзакции являются необратимыми</li>
-            <li>Комиссии указываются до проведения операции</li>
-            <li>Пользователь несет ответственность за правильность указания реквизитов</li>
-          </ul>
-        </section>
-
-        <section className="mt-12">
-          <h3>5. Ответственность сторон</h3>
-          <p>
-            Платформа не несет ответственности за:
-          </p>
-          <ul className="list-disc pl-6 mt-4">
-            <li>Действия третьих лиц</li>
-            <li>Технические сбои вне нашего контроля</li>
-            <li>Упущенную выгоду пользователей</li>
-          </ul>
-        </section>
-
-        <section className="mt-12">
-          <h3>6. Изменение условий</h3>
-          <p>
-            Платформа оставляет за собой право изменять настоящие условия использования. 
-            Пользователи будут уведомлены о существенных изменениях через электронную почту 
-            или уведомления на платформе.
-          </p>
-        </section>
-
-        <section className="mt-12">
-          <h3>7. Контакты</h3>
-          <p>
-            По всем вопросам, связанным с использованием платформы, вы можете обратиться:
-          </p>
-          <ul className="list-disc pl-6 mt-4">
-            <li>Email: support@supplychain.finance</li>
-            <li>Телефон: +7 (777) 777-77-77</li>
-            <li>Адрес: Алматы, ул. Сатпаева 22, офис 505</li>
-          </ul>
-        </section>
-      </div>
-    </div>
+      <motion.div
+        className="mt-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-lg p-8 text-white"
+        variants={sectionVariants}
+      >
+        <div className="flex items-center gap-4 mb-6">
+          <EnvelopeIcon className="h-8 w-8" />
+          <h3 className="text-2xl font-bold">
+            Контакты
+          </h3>
+        </div>
+        <p className="mb-6">
+          По всем вопросам, связанным с использованием платформы, вы можете обратиться:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="flex items-center gap-3">
+            <EnvelopeIcon className="h-6 w-6" />
+            <span>support@supplychain.finance</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <PhoneIcon className="h-6 w-6" />
+            <span>+7 (777) 777-77-77</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <MapPinIcon className="h-6 w-6" />
+            <span>Алматы, ул. Сатпаева 22, офис 505</span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
