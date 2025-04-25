@@ -58,11 +58,11 @@ const Home = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary-600 to-primary-800 mix-blend-multiply" />
         </div>
         <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            <span className="block animate-fade-in-up">SupplyChain Finance</span>
-            <span className="block text-primary-200 animate-fade-in-up-delay">на блокчейне Tron</span>
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl text-center">
+            <span className="block animate-fade-in-up mb-4">SupplyChain Finance</span>
+            <span className="block text-primary-200 animate-fade-in-up-delay text-3xl sm:text-4xl lg:text-5xl">на блокчейне Tron</span>
           </h1>
-          <p className="mt-6 max-w-lg mx-auto text-xl text-primary-100 sm:max-w-3xl animate-fade-in-up-delay-2">
+          <p className="mt-6 max-w-lg mx-auto text-xl text-primary-100 sm:max-w-3xl animate-fade-in-up-delay-2 text-center">
             Платформа для эффективного финансирования цепочек поставок с использованием технологии блокчейн.
           </p>
           <div className="mt-10 max-w-sm mx-auto sm:max-w-none sm:flex sm:justify-center animate-fade-in-up-delay-3">
