@@ -1,17 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   HomeIcon, 
   ChartBarIcon, 
-  BellIcon, 
-  CubeIcon, 
-  ShoppingCartIcon, 
-  DocumentTextIcon, 
   TruckIcon,
   WalletIcon,
   DocumentDuplicateIcon,
-  UserIcon,
-  CogIcon,
   ShieldCheckIcon,
   InformationCircleIcon,
   PhoneIcon,
@@ -22,17 +17,8 @@ import {
 const navigation = [
   { name: 'Главная', href: '/', icon: HomeIcon },
   { name: 'Панель управления', href: '/dashboard', icon: ChartBarIcon },
-  { name: 'Уведомления', href: '/dashboard/notifications', icon: BellIcon },
-  { name: 'Продукты', href: '/supplier/products', icon: CubeIcon },
-  { name: 'Заказы', href: '/supplier/orders', icon: ShoppingCartIcon },
-  { name: 'Счета', href: '/supplier/invoices', icon: DocumentTextIcon },
   { name: 'Поставки', href: '/supplier/shipments', icon: TruckIcon },
   { name: 'Транзакции', href: '/blockchain/transactions', icon: WalletIcon },
-  { name: 'Контракты', href: '/blockchain/contracts', icon: DocumentDuplicateIcon },
-  { name: 'Кошелек', href: '/blockchain/wallet', icon: WalletIcon },
-  { name: 'Профиль', href: '/profile', icon: UserIcon },
-  { name: 'Настройки', href: '/settings', icon: CogIcon },
-  { name: 'Безопасность', href: '/security', icon: ShieldCheckIcon },
 ];
 
 const additionalLinks = [
@@ -45,71 +31,171 @@ const additionalLinks = [
 const Sidebar = () => {
   const location = useLocation();
 
+  // Анимации для компонентов
+  const sidebarVariants = {
+    hidden: { x: -300, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 20,
+        mass: 0.8,
+        staggerChildren: 0.1,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { x: -20, opacity: 0 },
+    visible: {
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    }
+  };
+
+  const logoVariants = {
+    hidden: { scale: 0.8, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        delay: 0.2
+      }
+    }
+  };
+
+  const NavLink = ({ item, isActive }) => (
+    <motion.div
+      variants={itemVariants}
+      whileHover={{ 
+        scale: 1.02,
+        transition: { type: "spring", stiffness: 400 }
+      }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <Link
+        to={item.href}
+        className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
+          ${isActive 
+            ? 'bg-primary-600 text-white shadow-lg' 
+            : 'text-gray-300 hover:bg-primary-500/10 hover:text-white'
+          }`}
+      >
+        <motion.div
+          whileHover={{ rotate: isActive ? 0 : 20 }}
+          transition={{ type: "spring", stiffness: 400, damping: 10 }}
+        >
+          <item.icon
+            className={`mr-3 h-5 w-5 transition-colors duration-200
+              ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary-500'}`}
+            aria-hidden="true"
+          />
+        </motion.div>
+        <span className="font-medium">{item.name}</span>
+      </Link>
+    </motion.div>
+  );
+
   return (
-    <div className="flex flex-col h-full bg-gray-800 w-64">
-      <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-        <div className="flex items-center flex-shrink-0 px-4">
-          <span className="text-white text-xl font-bold">SupplyChain Finance</span>
-        </div>
-        <nav className="mt-5 flex-1 px-2 space-y-1">
-          {navigation.map((item) => {
-            const isActive = location.pathname === item.href;
-            return (
-              <Link
+    <motion.div
+      className="bg-gray-900 rounded-xl shadow-xl overflow-hidden"
+      initial="hidden"
+      animate="visible"
+      variants={sidebarVariants}
+    >
+      {/* Логотип */}
+      <motion.div 
+        className="flex items-center justify-center h-16 px-4 bg-gray-800/50 backdrop-blur-sm"
+        variants={logoVariants}
+      >
+        <motion.span 
+          className="text-xl font-bold text-white tracking-wider"
+          whileHover={{ 
+            scale: 1.05,
+            transition: { type: "spring", stiffness: 400 }
+          }}
+        >
+          SupplyChain
+          <motion.span 
+            className="text-primary-500"
+            animate={{ 
+              opacity: [1, 0.8, 1],
+              scale: [1, 1.05, 1]
+            }}
+            transition={{ 
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            Finance
+          </motion.span>
+        </motion.span>
+      </motion.div>
+
+      {/* Основная навигация */}
+      <div className="flex flex-col min-h-0">
+        <motion.nav 
+          className="flex-1 px-3 py-4 space-y-2"
+          variants={itemVariants}
+        >
+          <AnimatePresence mode="wait">
+            {navigation.map((item) => (
+              <NavLink
                 key={item.name}
-                to={item.href}
-                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                }`}
-              >
-                <item.icon
-                  className={`mr-3 h-6 w-6 ${
-                    isActive ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'
-                  }`}
-                  aria-hidden="true"
-                />
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-      <div className="flex-shrink-0 flex border-t border-gray-700 p-4">
-        <div className="flex-shrink-0 w-full group block">
-          <div className="flex items-center">
-            <div>
-              <p className="text-sm font-medium text-white">Дополнительно</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <nav className="flex-1 px-2 pb-4 space-y-1">
-        {additionalLinks.map((item) => {
-          const isActive = location.pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                isActive
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
-            >
-              <item.icon
-                className={`mr-3 h-6 w-6 ${
-                  isActive ? 'text-gray-300' : 'text-gray-400 group-hover:text-gray-300'
-                }`}
-                aria-hidden="true"
+                item={item}
+                isActive={location.pathname === item.href}
               />
-              {item.name}
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+            ))}
+          </AnimatePresence>
+        </motion.nav>
+
+        {/* Разделитель */}
+        <motion.div 
+          className="px-3 py-4"
+          variants={itemVariants}
+        >
+          <motion.div 
+            className="h-px bg-gray-700/50"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 0.5 }}
+          />
+        </motion.div>
+
+        {/* Дополнительные ссылки */}
+        <motion.nav 
+          className="px-3 pb-4 space-y-1"
+          variants={itemVariants}
+        >
+          <motion.p 
+            className="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider"
+            variants={itemVariants}
+          >
+            Дополнительно
+          </motion.p>
+          <AnimatePresence mode="wait">
+            {additionalLinks.map((item) => (
+              <NavLink
+                key={item.name}
+                item={item}
+                isActive={location.pathname === item.href}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.nav>
+      </div>
+    </motion.div>
   );
 };
 

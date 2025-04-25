@@ -10,7 +10,7 @@ const { sendPasswordResetEmail } = require('../models/mailer');
 // Регистрация пользователя
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, role, entityName, email } = req.body;
+        const { username, password, role, entityName, description, email } = req.body;
 
         // Проверка ввода
         if (!['company', 'supplier'].includes(role)) {
@@ -26,11 +26,11 @@ router.post('/register', async (req, res) => {
 
         // Если компания/поставщик не найдены, создаем нового
         if (!entity) {
-            console.log(234)
-            const newEntity = await addEntity(role, entityName); // Передаем роль как type
+            console.log('Creating new entity with description:', description);
+            const newEntity = await addEntity(role, entityName, description); // Передаем description
             entity = { id: newEntity.data.id, name: newEntity.data.name };
         }
-        console.log(entity)
+        console.log('Entity:', entity);
 
         // Проверка, существует ли пользователь
         const userExists = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -41,8 +41,12 @@ router.post('/register', async (req, res) => {
         // Хеширование пароля
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Генерация токена верификации
-        const verificationToken = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        // Генерация токена верификации без срока действия
+        const verificationToken = jwt.sign(
+            { email },
+            process.env.JWT_SECRET
+            // Убираем опцию expiresIn, чтобы токен не имел срока действия
+        );
 
         // Создание пользователя
         const newUser = await pool.query(
@@ -74,9 +78,10 @@ router.get('/verify-email', async (req, res) => {
         // Проверка токена
         let decoded;
         try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET);
+            // Отключаем проверку срока действия токена
+            decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
         } catch (err) {
-            return res.status(400).json({ message: 'Invalid or expired token' });
+            return res.status(400).json({ message: 'Недействительный токен' });
         }
 
         // Поиск пользователя по токену
@@ -92,6 +97,14 @@ router.get('/verify-email', async (req, res) => {
             [user.id]
         );
 
+        // Проверяем обновление
+        const updatedUser = await pool.query('SELECT * FROM users WHERE id = $1', [user.id]);
+        console.log('User after verification:', {
+            username: updatedUser.rows[0].username,
+            is_verified: updatedUser.rows[0].is_verified,
+            has_verification_token: !!updatedUser.rows[0].verification_token
+        });
+
         res.status(200).json({ message: 'Email verified successfully' });
     } catch (error) {
         console.error(error);
@@ -104,8 +117,18 @@ router.post('/login', async (req, res) => {
         const { username, password } = req.body;
 
         // Поиск пользователя
-        const userResult = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const userResult = await pool.query(
+            'SELECT id, username, password_hash, email, is_verified, verification_token FROM users WHERE username = $1',
+            [username]
+        );
         const user = userResult.rows[0];
+        console.log('Login attempt for user:', {
+            username,
+            found: !!user,
+            is_verified: user?.is_verified,
+            has_verification_token: !!user?.verification_token
+        });
+        
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -114,6 +137,14 @@ router.post('/login', async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        // Проверка верификации email
+        if (!user.is_verified) {
+            return res.status(403).json({ 
+                message: 'Please verify your email before logging in',
+                needsVerification: true 
+            });
         }
 
         // Получение данных из user_roles

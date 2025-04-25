@@ -44,11 +44,14 @@ router.post('/createShipment', authMiddleware, async (req, res) => {
 router.post('/createTransaction', authMiddleware, async (req, res) => {
     const { shipmentId, blockchainTxId, trxAmount, usdtAmount } = req.body;
     try {
-        const transaction = await service.createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmount);
-        res.status(201).json({ success: true, data: transaction });
+        const result = await service.createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmount);
+        res.status(201).json(result);
     } catch (err) {
-        console.error('Error in createTransaction:', err);
-        res.status(500).json({ success: false, error: 'Failed to create transaction' });
+        console.error('❌ Ошибка в createTransaction:', err);
+        res.status(400).json({ 
+            success: false, 
+            error: err.message || 'Ошибка при создании транзакции' 
+        });
     }
 });
 
@@ -89,11 +92,7 @@ router.get('/getShipment/:shipmentID', authMiddleware, async (req, res) => {
     const shipmentID = req.params.shipmentID;
     try {
         const result = await service.getShipment(shipmentID);
-        if (result.success) {
-            res.status(200).json(result);
-        } else {
-            res.status(404).json(result); // Более точный статус для отсутствующей поставки
-        }
+        res.status(200).json(result);
     } catch (err) {
         console.error('Error in getShipment:', err);
         res.status(500).json({ error: 'Failed to fetch shipment' });

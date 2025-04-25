@@ -21,11 +21,11 @@ async function getEntities() {
 }
 
 // Добавление новой компании или поставщика
-async function addEntity(type, name) {
+async function addEntity(type, name, description) {
     const AUTH_TOKEN = process.env.JWT_TOKEN;
 
     try {
-        const response = await axios.post(`${SHIPMENT_URL}/createEntity`, { type, name }, {
+        const response = await axios.post(`${SHIPMENT_URL}/createEntity`, { type, name, description }, {
             headers: {
                 Authorization: `Bearer ${AUTH_TOKEN}`
             }
