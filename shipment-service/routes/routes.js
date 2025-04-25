@@ -99,6 +99,18 @@ router.get('/getShipment/:shipmentID', authMiddleware, async (req, res) => {
     }
 });
 
+// Проверка кошелька поставщика
+router.get('/checkSupplierWallet/:supplierID', authMiddleware, async (req, res) => {
+    const supplierID = req.params.supplierID;
+    try {
+        const result = await service.checkSupplierWallet(supplierID);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error('Error in checkSupplierWallet:', err);
+        res.status(500).json({ error: 'Failed to fetch supplier wallet' });
+    }
+});
+
 router.get('/getShipments', authMiddleware, async (req, res) => {
     try {
         // Извлечение параметров из query
@@ -187,6 +199,16 @@ router.get('/getEntities', authMiddleware, async (req, res) => {
     }
 });
 
+router.get('/getEntitiesForShipment', authMiddleware, async (req, res) => {
+    try {
+        const data = await service.getCompaniesAndSuppliersForShipment();
+        res.status(200).json({ success: true, data });
+    } catch (err) {
+        console.error('Error in getCompaniesAndSuppliers:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch companies and suppliers' });
+    }
+});
+
 router.post('/createEntity', authMiddleware, async (req, res) => {
     const { type, name, description } = req.body;
 
@@ -197,6 +219,24 @@ router.post('/createEntity', authMiddleware, async (req, res) => {
     } catch (err) {
         console.error('Error in createEntity:', err);
         res.status(400).json({ success: false, error: err.message || 'Failed to create entity' });
+    }
+});
+
+router.get('/getEntityData', authMiddleware, async (req, res) => {
+    const { type, entityId } = req.query; // Используем req.query для получения параметров
+
+    try {
+        // Получаем данные с помощью универсальной функции
+        const entity = await service.getEntityData(type, entityId);
+
+        if (entity.error) {
+            return res.status(400).json({ success: false, error: entity.error }); // Если произошла ошибка при получении данных
+        }
+
+        res.status(200).json({ success: true, data: entity }); // Успешный ответ
+    } catch (err) {
+        console.error('Error in getEntityData:', err.message); // Логируем сообщение об ошибке
+        res.status(500).json({ success: false, error: 'Failed to fetch entity data' }); // Ответ с ошибкой сервера
     }
 });
 

@@ -5,6 +5,7 @@ const TronWeb = require('tronweb');
 const tronWeb = new TronWeb({ fullHost: 'https://nile.trongrid.io' });
 const { v4: uuidv4 } = require('uuid');
 const axios = require('axios');
+const { error } = require('console');
 let TRX_RATE;
 
 async function getTrxRate() {
@@ -362,6 +363,38 @@ async function getCompaniesAndSuppliers() {
     }
 }
 
+async function getCompaniesAndSuppliersForShipment() {
+    const companiesQuery = `
+        SELECT id, name FROM companies;
+    `;
+    const suppliersQuery = `
+        SELECT id, name FROM suppliers WHERE wallet_address IS NOT NULL;
+    `;
+
+    try {
+        // Выполняем запросы к базе данных
+        const companiesResult = await pool.query(companiesQuery);
+        const suppliersResult = await pool.query(suppliersQuery);
+
+        // Формируем результат в требуемом формате
+        const result = {
+            suppliers: suppliersResult.rows.map(row => ({
+                id: row.id,
+                name: row.name
+            })),
+            companies: companiesResult.rows.map(row => ({
+                id: row.id,
+                name: row.name
+            }))
+        };
+
+        return result;
+    } catch (error) {
+        console.error('Error fetching companies and suppliers:', error);
+        throw error;
+    }
+}
+
 async function createEntity(type, name, description) {
     // Проверяем допустимость типа
     if (type !== 'company' && type !== 'supplier') {
@@ -384,6 +417,20 @@ async function createEntity(type, name, description) {
         console.error(`Error creating ${type}:`, error);
         throw error;
     }
+}
+
+async function getEntityData(type, entityId) {
+    const table = type === 'company' ? 'companies' : 'suppliers';
+    const query = `
+        SELECT * FROM ${table} WHERE id = $1;
+    `;
+    const params = [entityId];
+    const result = await pool.query(query, params);
+    if (result.rows.length === 0) {
+        console.error(`Entity with ID ${entityId} not found in ${table}`);
+        return { error: `Entity with ID ${entityId} not found` };
+    }
+    return result.rows[0]; // Возвращаем первую запись
 }
 
 async function updateSupplierWallet(supplierId, walletAddress) {
@@ -471,6 +518,7 @@ async function getShipment(shipmentID) {
         }
 
         const shipmentDB = result.rows[0];
+        console.log('Shipment from DB:', shipmentDB.uuid);
         const contractData = await contract.getShipment(shipmentDB.uuid);
 
         const transactionQuery = `
@@ -486,6 +534,24 @@ async function getShipment(shipmentID) {
     } catch (err) {
         console.error(err);
         throw err;
+    }
+}
+
+async function checkSupplierWallet(supplierID) {
+    try {
+        const supplierQuery = `
+            SELECT wallet_address FROM suppliers WHERE id = $1;
+        `;
+        const supplierResult = await pool.query(supplierQuery, [supplierID]);
+        if (supplierResult.rows.length === 0) {
+            return { error: 'Supplier not found' };
+        }
+
+        // Возвращаем адрес кошелька
+        return { walletAddress: supplierResult.rows[0].wallet_address };
+    } catch (err) {
+        console.error(err);
+        return { error: 'Failed to fetch supplier wallet' };
     }
 }
 
@@ -581,5 +647,8 @@ module.exports = {
     getAmountByUuid,
     getShipments,
     getShipment,
-    updateSupplierWallet
+    updateSupplierWallet,
+    getCompaniesAndSuppliersForShipment,
+    checkSupplierWallet,
+    getEntityData
 };

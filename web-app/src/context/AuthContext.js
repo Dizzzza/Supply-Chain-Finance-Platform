@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import { jwtDecode } from 'jwt-decode'; // Используем именованный импорт
 
 const AuthContext = createContext();
 
@@ -12,10 +13,21 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('userToken');
         if (token) {
-            // Здесь можно добавить проверку валидности токена
-            setUser({ token });
+            try {
+                const decoded = jwtDecode(token); // Декодируем токен
+                setUser({
+                    token,
+                    user_id: decoded.user_id,
+                    username: decoded.username,
+                    role_type: decoded.role_type,
+                    entity_id: decoded.entity_id
+                });
+            } catch (error) {
+                console.error('Ошибка при декодировании токена:', error);
+                localStorage.removeItem('token'); // Удаляем некорректный токен
+            }
         }
         setLoading(false);
     }, []);
@@ -29,8 +41,17 @@ export const AuthProvider = ({ children }) => {
 
             if (response.data.token) {
                 const { token } = response.data;
-                localStorage.setItem('token', token);
-                setUser({ token });
+                localStorage.setItem('userToken', token);
+
+                const decoded = jwtDecode(token); // Декодируем токен
+                setUser({
+                    token,
+                    user_id: decoded.user_id,
+                    username: decoded.username,
+                    role_type: decoded.role_type,
+                    entity_id: decoded.entity_id
+                });
+
                 return { success: true };
             } else if (response.data.needsVerification) {
                 return {

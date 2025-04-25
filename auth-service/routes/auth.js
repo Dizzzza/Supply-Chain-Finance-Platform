@@ -176,6 +176,43 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// Получение информации о пользователе
+router.get('/profile/:userId', async (req, res) => {
+    try {
+        const { userId } = req.params;
+
+        // Проверка валидности userId
+        if (!userId || isNaN(userId)) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        // Поиск пользователя по ID
+        const userQuery = `SELECT 
+            u.username, 
+            u.email,
+            u.is_verified,
+            ur.role_type 
+        FROM users u
+        JOIN user_roles ur ON u.id = ur.user_id 
+        WHERE u.id = $1`; // Уточнено u.id
+        const userResult = await pool.query(userQuery, [userId]);
+        const user = userResult.rows[0];
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({
+            username: user.username,
+            email: user.email,
+            is_verified: user.is_verified,
+            role_type: user.role_type
+        });
+    } catch (error) {
+        console.error('Error fetching user profile:', error.message);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 // Смена пароля
 router.post('/request-password-reset', async (req, res) => {
     try {
