@@ -7,9 +7,6 @@ import {
   CurrencyDollarIcon,
   ExclamationTriangleIcon,
   ArrowPathIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
   UserIcon,
   KeyIcon,
   BanknotesIcon
@@ -156,39 +153,10 @@ const Terms = () => {
           </h3>
         </div>
         <p className="text-gray-600">
-          Платформа оставляет за собой право изменять настоящие условия использования.
-          Пользователи будут уведомлены о существенных изменениях через электронную почту
+          Платформа оставляет за собой право изменять настоящие условия использования. 
+          Пользователи будут уведомлены о существенных изменениях через электронную почту 
           или уведомления на платформе.
         </p>
-      </motion.div>
-
-      <motion.div
-        className="mt-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-lg p-8 text-white"
-        variants={sectionVariants}
-      >
-        <div className="flex items-center gap-4 mb-6">
-          <EnvelopeIcon className="h-8 w-8" />
-          <h3 className="text-2xl font-bold">
-            Контакты
-          </h3>
-        </div>
-        <p className="mb-6">
-          По всем вопросам, связанным с использованием платформы, вы можете обратиться:
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex items-center gap-3">
-            <EnvelopeIcon className="h-6 w-6" />
-            <span>support@supplychain.finance</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <PhoneIcon className="h-6 w-6" />
-            <span>+7 (777) 777-77-77</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <MapPinIcon className="h-6 w-6" />
-            <span>Алматы, ул. Сатпаева 22, офис 505</span>
-          </div>
-        </div>
       </motion.div>
     </motion.div>
   );

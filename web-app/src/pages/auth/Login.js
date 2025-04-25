@@ -112,16 +112,16 @@ const Login = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <UserIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={handleChange}
+              <input
+                id="username"
+                name="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={handleChange}
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Введите имя пользователя"
-                />
+              />
               </div>
             </div>
             <div>
@@ -132,16 +132,16 @@ const Login = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={handleChange}
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Введите пароль"
-                />
+              />
               </div>
             </div>
           </div>
@@ -172,8 +172,8 @@ const Login = () => {
                 to="/register" 
                 className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200"
               >
-                Нет аккаунта? Зарегистрироваться
-              </Link>
+              Нет аккаунта? Зарегистрироваться
+            </Link>
             </div>
           </div>
         </form>

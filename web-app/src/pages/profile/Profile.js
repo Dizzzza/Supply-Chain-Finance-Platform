@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { motion } from 'framer-motion';
+import { FaUser, FaEnvelope, FaUserTag, FaBuilding, FaInfoCircle, FaWallet, FaPlus } from 'react-icons/fa';
 
 const Profile = () => {
   const { user } = useAuth(); // Получаем данные пользователя из контекста
@@ -20,7 +22,18 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
+        // Проверяем наличие данных пользователя
+        if (!user || !user.user_id) {
+          setLoading(false);
+          return;
+        }
+
         const token = localStorage.getItem('token');
+        if (!token) {
+          setError('Требуется авторизация');
+          setLoading(false);
+          return;
+        }
 
         // Запрос на получение данных профиля
         const userResponse = await axios.get(`http://localhost:3003/auth/profile/${user.user_id}`, {
@@ -50,7 +63,11 @@ const Profile = () => {
         });
       } catch (err) {
         console.error('Ошибка при загрузке данных профиля или сущности:', err);
-        setError('Не удалось загрузить данные профиля. Попробуйте позже.');
+        if (err.response) {
+          setError(`Ошибка: ${err.response.data.message || 'Не удалось загрузить данные профиля'}`);
+        } else {
+          setError('Не удалось загрузить данные профиля. Попробуйте позже.');
+        }
       } finally {
         setLoading(false); // Завершаем загрузку
       }
@@ -90,82 +107,173 @@ const Profile = () => {
   };
 
   if (loading) {
-    return <div className="text-center py-6">Загрузка...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Загрузка профиля...</p>
+        </motion.div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-6 text-red-500">{error}</div>;
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center py-6 text-red-500 bg-red-50 rounded-lg shadow-sm"
+      >
+        {error}
+      </motion.div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8"
+    >
       <div className="px-4 py-6 sm:px-0">
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          <div className="px-4 py-5 sm:px-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">Профиль пользователя</h3>
-            <p className="mt-1 max-w-2xl text-sm text-gray-500">Личная информация</p>
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white shadow-lg rounded-xl overflow-hidden"
+        >
+          <div className="px-6 py-8 bg-gradient-to-r from-blue-600 to-blue-700">
+            <h3 className="text-2xl font-bold text-white">Профиль пользователя</h3>
+            <p className="mt-2 text-blue-100">Личная информация</p>
           </div>
           <div className="border-t border-gray-200">
             <dl>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Имя пользователя</dt>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="bg-gray-50 px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-100 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaUser className="mr-2 text-blue-600" />
+                  Имя пользователя
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userData.username}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Email</dt>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaEnvelope className="mr-2 text-blue-600" />
+                  Email
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userData.email}</dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Роль</dt>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="bg-gray-50 px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-100 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaUserTag className="mr-2 text-blue-600" />
+                  Роль
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userData.role}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Название организации</dt>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                className="bg-white px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaBuilding className="mr-2 text-blue-600" />
+                  Название организации
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userData.entityName}</dd>
-              </div>
-              <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Описание организации</dt>
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.7 }}
+                className="bg-gray-50 px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-100 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaInfoCircle className="mr-2 text-blue-600" />
+                  Описание организации
+                </dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{userData.entityDescription}</dd>
-              </div>
-              <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                <dt className="text-sm font-medium text-gray-500">Кошелек организации</dt>
-                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+              </motion.div>
+              <motion.div
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.8 }}
+                className="bg-white px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4 hover:bg-gray-50 transition-colors duration-200"
+              >
+                <dt className="text-sm font-medium text-gray-500 flex items-center">
+                  <FaWallet className="mr-2 text-blue-600" />
+                  Кошелек организации
+                </dt>
+                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 flex items-center">
                   {userData.entityWallet}
                   {userData.entityWallet === 'Не указан' && !showWalletInput && (
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => setShowWalletInput(true)}
-                      className="ml-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700"
+                      className="ml-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center"
                     >
+                      <FaPlus className="mr-2" />
                       Добавить кошелек
-                    </button>
+                    </motion.button>
                   )}
                 </dd>
-              </div>
+              </motion.div>
               {showWalletInput && (
-                <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                  <dt className="text-sm font-medium text-gray-500">Введите кошелек</dt>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-50 px-6 py-5 sm:grid sm:grid-cols-3 sm:gap-4"
+                >
+                  <dt className="text-sm font-medium text-gray-500 flex items-center">
+                    <FaWallet className="mr-2 text-blue-600" />
+                    Введите кошелек
+                  </dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                     <input
                       type="text"
                       value={walletInput}
                       onChange={(e) => setWalletInput(e.target.value)}
-                      className="border border-gray-300 rounded px-3 py-2 w-full"
+                      className="border border-gray-300 rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                       placeholder="Введите адрес кошелька"
                     />
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={handleAddWallet}
-                      className="mt-2 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700"
+                      className="mt-3 px-6 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center"
                     >
+                      <FaPlus className="mr-2" />
                       Сохранить
-                    </button>
+                    </motion.button>
                   </dd>
-                </div>
+                </motion.div>
               )}
             </dl>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
