@@ -129,18 +129,9 @@ const Transactions = () => {
       );
       if (response.data) {
         setSelectedShipment(response.data);
-        // Получаем информацию о платеже
-        const paymentResponse = await axios.post(
-          'http://localhost:3003/ship/createShipment',
-          {
-            companyId: response.data.database.company_id,
-            supplierId: response.data.database.supplier_id,
-            fiatAmount: response.data.database.fiat_amount,
-            status: "Started",
-            handler: response.data.database.handler,
-            name: response.data.database.shipment_name,
-            description: response.data.database.shipment_description
-          },
+        // Получаем информацию о платеже для существующей поставки
+        const paymentResponse = await axios.get(
+          `http://localhost:3003/ship/getPaymentInfo/${selectedShipmentId}`,
           getAuthHeaders()
         );
         if (paymentResponse.data.success) {
@@ -288,51 +279,51 @@ const Transactions = () => {
         variants={cardVariants}
       >
         <div className="px-6 py-5">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
             <motion.div whileHover="hover" variants={cardVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Выберите тип
-              </label>
+              Выберите тип
+            </label>
               <div className="relative">
-                <select
+            <select
                   className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
-                  value={selectedType}
-                  onChange={(e) => {
-                    setSelectedType(e.target.value);
-                    setSelectedEntityId('');
-                    setSelectedShipmentId('');
-                    setSelectedShipment(null);
-                  }}
-                >
-                  <option value="company">Компания</option>
-                  <option value="supplier">Поставщик</option>
-                </select>
+              value={selectedType}
+              onChange={(e) => {
+                setSelectedType(e.target.value);
+                setSelectedEntityId('');
+                setSelectedShipmentId('');
+                setSelectedShipment(null);
+              }}
+            >
+              <option value="company">Компания</option>
+              <option value="supplier">Поставщик</option>
+            </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
                 </div>
-              </div>
+          </div>
             </motion.div>
 
             <motion.div whileHover="hover" variants={cardVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
-              </label>
+              {selectedType === 'company' ? 'Выберите компанию' : 'Выберите поставщика'}
+            </label>
               <div className="relative">
-                <select
+            <select
                   className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
-                  value={selectedEntityId}
-                  onChange={(e) => {
-                    setSelectedEntityId(e.target.value);
-                    setSelectedShipmentId('');
-                    setSelectedShipment(null);
-                  }}
+              value={selectedEntityId}
+              onChange={(e) => {
+                setSelectedEntityId(e.target.value);
+                setSelectedShipmentId('');
+                setSelectedShipment(null);
+              }}
                   disabled={loading.entities}
-                >
-                  <option value="">Выберите...</option>
-                  {(selectedType === 'company' ? companies : suppliers).map(entity => (
-                    <option key={entity.id} value={entity.id}>{entity.name}</option>
-                  ))}
-                </select>
+            >
+              <option value="">Выберите...</option>
+              {(selectedType === 'company' ? companies : suppliers).map(entity => (
+                <option key={entity.id} value={entity.id}>{entity.name}</option>
+              ))}
+            </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   {loading.entities ? (
                     <ArrowPathIcon className="h-5 w-5 text-gray-400 animate-spin" />
@@ -340,27 +331,27 @@ const Transactions = () => {
                     <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
                   )}
                 </div>
-              </div>
+          </div>
             </motion.div>
 
             <motion.div whileHover="hover" variants={cardVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Выберите поставку
-              </label>
+              Выберите поставку
+            </label>
               <div className="relative">
-                <select
+            <select
                   className="block w-full pl-3 pr-10 py-2.5 text-base border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg transition-all duration-200"
-                  value={selectedShipmentId}
-                  onChange={(e) => setSelectedShipmentId(e.target.value)}
+              value={selectedShipmentId}
+              onChange={(e) => setSelectedShipmentId(e.target.value)}
                   disabled={loading.shipments || !selectedEntityId}
-                >
-                  <option value="">Выберите поставку</option>
-                  {shipments.map(shipment => (
-                    <option key={shipment.id} value={shipment.id}>
-                      {shipment.shipment_name}
-                    </option>
-                  ))}
-                </select>
+            >
+              <option value="">Выберите поставку</option>
+              {shipments.map(shipment => (
+                <option key={shipment.id} value={shipment.id}>
+                  {shipment.shipment_name}
+                </option>
+              ))}
+            </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   {loading.shipments ? (
                     <ArrowPathIcon className="h-5 w-5 text-gray-400 animate-spin" />
@@ -375,7 +366,7 @@ const Transactions = () => {
       </motion.div>
 
       <AnimatePresence mode="wait">
-        {selectedShipment && (
+      {selectedShipment && (
           <motion.div 
             className="mt-6 bg-white shadow-lg rounded-xl overflow-hidden"
             variants={cardVariants}
@@ -386,16 +377,16 @@ const Transactions = () => {
             <div className="px-6 py-5">
               <h3 className="text-lg font-medium leading-6 text-gray-900 flex items-center gap-2">
                 <DocumentTextIcon className="h-5 w-5 text-primary-600" />
-                Детали поставки
-              </h3>
+              Детали поставки
+            </h3>
               <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 <motion.div 
                   className="bg-gray-50 rounded-lg p-4"
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">ID поставки</p>
-                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.id}</p>
+                <p className="text-sm font-medium text-gray-500">ID поставки</p>
+                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.id}</p>
                 </motion.div>
 
                 <motion.div 
@@ -403,7 +394,7 @@ const Transactions = () => {
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">UUID</p>
+                <p className="text-sm font-medium text-gray-500">UUID</p>
                   <p className="mt-1 text-sm text-gray-900 break-all">{selectedShipment.database.uuid}</p>
                 </motion.div>
 
@@ -412,8 +403,8 @@ const Transactions = () => {
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">Сумма (USDT)</p>
-                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
+                <p className="text-sm font-medium text-gray-500">Сумма (USDT)</p>
+                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.fiat_amount} {selectedShipment.database.fiat_currency}</p>
                 </motion.div>
 
                 <motion.div 
@@ -421,8 +412,8 @@ const Transactions = () => {
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">Сумма (TRX)</p>
-                  <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.crypto_amount} TRX</p>
+                <p className="text-sm font-medium text-gray-500">Сумма (TRX)</p>
+                <p className="mt-1 text-sm text-gray-900">{selectedShipment.database.crypto_amount} TRX</p>
                 </motion.div>
 
                 <motion.div 
@@ -430,7 +421,7 @@ const Transactions = () => {
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">Статус инициализации</p>
+                <p className="text-sm font-medium text-gray-500">Статус инициализации</p>
                   <div className="mt-1 flex items-center">
                     {selectedShipment.database.init ? (
                       <CheckCircleIcon className="h-5 w-5 text-green-500 mr-1" />
@@ -440,7 +431,7 @@ const Transactions = () => {
                     <span className="text-sm text-gray-900">
                       {selectedShipment.database.init ? 'Инициализирована' : 'Не инициализирована'}
                     </span>
-                  </div>
+              </div>
                 </motion.div>
 
                 <motion.div 
@@ -448,15 +439,15 @@ const Transactions = () => {
                   variants={cardVariants}
                   whileHover="hover"
                 >
-                  <p className="text-sm font-medium text-gray-500">Дата создания</p>
+                <p className="text-sm font-medium text-gray-500">Дата создания</p>
                   <div className="mt-1 flex items-center">
                     <ClockIcon className="h-5 w-5 text-gray-400 mr-1" />
                     <span className="text-sm text-gray-900">{formatDate(selectedShipment.database.created_at)}</span>
-                  </div>
-                </motion.div>
               </div>
+                </motion.div>
+            </div>
 
-              {!selectedShipment.database.init && (
+            {!selectedShipment.database.init && (
                 <motion.div 
                   className="mt-6"
                   initial={{ opacity: 0, y: 20 }}
@@ -464,17 +455,17 @@ const Transactions = () => {
                   transition={{ delay: 0.2 }}
                 >
                   <motion.button
-                    onClick={() => setShowCreateModal(true)}
+                  onClick={() => setShowCreateModal(true)}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                  >
-                    Создать транзакцию
+                >
+                  Создать транзакцию
                   </motion.button>
                 </motion.div>
-              )}
+            )}
 
-              {selectedShipment.transactions.length > 0 && (
+            {selectedShipment.transactions.length > 0 && (
                 <motion.div 
                   className="mt-8"
                   initial={{ opacity: 0 }}
@@ -483,18 +474,18 @@ const Transactions = () => {
                 >
                   <h4 className="text-lg font-medium text-gray-900 mb-4">История транзакций</h4>
                   <div className="overflow-x-auto rounded-lg border border-gray-200">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TX Hash</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Токен</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">TX Hash</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сумма</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Токен</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
                         <AnimatePresence>
-                          {selectedShipment.transactions.map((tx) => (
+                      {selectedShipment.transactions.map((tx) => (
                             <motion.tr 
                               key={tx.id}
                               variants={tableRowVariants}
@@ -504,25 +495,25 @@ const Transactions = () => {
                               whileHover="hover"
                               className="hover:bg-gray-50 transition-colors duration-150"
                             >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{tx.id}</td>
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">{tx.blockchain_tx_id}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.amount}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{tx.token_name}</td>
                             </motion.tr>
-                          ))}
+                      ))}
                         </AnimatePresence>
-                      </tbody>
-                    </table>
-                  </div>
+                    </tbody>
+                  </table>
+                </div>
                 </motion.div>
-              )}
-            </div>
+            )}
+          </div>
           </motion.div>
-        )}
+      )}
       </AnimatePresence>
 
       <AnimatePresence>
-        {showCreateModal && selectedShipment && (
+      {showCreateModal && selectedShipment && (
           <motion.div 
             className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center"
             initial={{ opacity: 0 }}
@@ -537,8 +528,8 @@ const Transactions = () => {
             >
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                  Создание новой транзакции
-                </h3>
+                Создание новой транзакции
+              </h3>
                 <button
                   onClick={() => setShowCreateModal(false)}
                   className="text-gray-400 hover:text-gray-500 transition-colors"
@@ -586,8 +577,8 @@ const Transactions = () => {
                     <div className="bg-white p-3 rounded-md">
                       <p className="text-sm text-blue-800 mb-2">Адрес кошелька для оплаты:</p>
                       <p className="text-xs font-mono break-all bg-blue-50 p-2 rounded">
-                        {paymentInfo?.payWallet || 'Адрес кошелька не найден'}
-                      </p>
+                    {paymentInfo?.payWallet || 'Адрес кошелька не найден'}
+                  </p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-white p-3 rounded-md">
@@ -602,13 +593,13 @@ const Transactions = () => {
                           {paymentInfo?.sendUsdtSumm || selectedShipment.database.fiat_amount}
                         </p>
                       </div>
-                    </div>
-                    {paymentInfo && (
-                      <p className="text-xs text-blue-700 mt-2">
-                        {paymentInfo.message}
-                      </p>
-                    )}
                   </div>
+                  {paymentInfo && (
+                      <p className="text-xs text-blue-700 mt-2">
+                      {paymentInfo.message}
+                    </p>
+                  )}
+                </div>
                 </motion.div>
 
                 <div className="flex justify-end gap-3">
@@ -641,7 +632,7 @@ const Transactions = () => {
               </form>
             </motion.div>
           </motion.div>
-        )}
+      )}
       </AnimatePresence>
     </motion.div>
   );

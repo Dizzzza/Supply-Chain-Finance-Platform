@@ -15,7 +15,7 @@ const MainLayout = () => {
             {/* Сайдбар */}
             <div className="w-64 flex-shrink-0">
               <div className="sticky top-6">
-                <Sidebar />
+        <Sidebar />
               </div>
             </div>
             

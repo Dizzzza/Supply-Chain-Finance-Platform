@@ -83,30 +83,30 @@ const Sidebar = () => {
       }}
       whileTap={{ scale: 0.95 }}
     >
-      <Link
-        to={item.href}
+              <Link
+                to={item.href}
         className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
           ${isActive 
             ? 'bg-primary-600 text-white shadow-lg' 
             : 'text-gray-300 hover:bg-primary-500/10 hover:text-white'
-          }`}
+                }`}
       >
         <motion.div
           whileHover={{ rotate: isActive ? 0 : 20 }}
           transition={{ type: "spring", stiffness: 400, damping: 10 }}
-        >
-          <item.icon
+              >
+                <item.icon
             className={`mr-3 h-5 w-5 transition-colors duration-200
               ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary-500'}`}
-            aria-hidden="true"
-          />
+                  aria-hidden="true"
+                />
         </motion.div>
         <span className="font-medium">{item.name}</span>
-      </Link>
+              </Link>
     </motion.div>
   );
 
-  return (
+          return (
     <motion.div
       className="bg-gray-900 rounded-xl shadow-xl overflow-hidden"
       initial="hidden"
@@ -152,7 +152,7 @@ const Sidebar = () => {
           <AnimatePresence mode="wait">
             {navigation.map((item) => (
               <NavLink
-                key={item.name}
+              key={item.name}
                 item={item}
                 isActive={location.pathname === item.href}
               />
@@ -194,7 +194,7 @@ const Sidebar = () => {
             ))}
           </AnimatePresence>
         </motion.nav>
-      </div>
+    </div>
     </motion.div>
   );
 };

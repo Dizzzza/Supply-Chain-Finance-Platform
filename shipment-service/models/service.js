@@ -243,7 +243,7 @@ async function checkTx(blockchainTxId, trxAmount, usdtAmount) {
             }
 
             if (parseFloat(trxAmount) > parseFloat(amount)) {
-                return { error: 'Не достаточно средств' };
+                return { error: 'Недостаточно средств' };
             }
 
             return { success: true, amount, currency: 'TRX' };
@@ -636,6 +636,57 @@ const getShipments = async (type, id, filters = {}) => {
     }
 };
 
+async function getPaymentInfo(shipmentId) {
+    try {
+        // Получаем информацию о поставке
+        const shipmentQuery = `
+            SELECT 
+                fiat_amount,
+                crypto_amount,
+                init
+            FROM shipments 
+            WHERE id = $1
+        `;
+        const result = await pool.query(shipmentQuery, [shipmentId]);
+        
+        if (result.rows.length === 0) {
+            throw new Error('Shipment not found');
+        }
+
+        const shipment = result.rows[0];
+
+        // Если поставка уже инициализирована, возвращаем существующие суммы
+        if (shipment.init) {
+            return {
+                success: true,
+                data: {
+                    payWallet: process.env.OUR_WALLET,
+                    sendTrxSumm: shipment.crypto_amount,
+                    sendUsdtSumm: shipment.fiat_amount,
+                    message: 'Поставка уже инициализирована'
+                }
+            };
+        }
+
+        // Если поставка не инициализирована, получаем актуальный курс TRX
+        await getTrxRate();
+        const trxAmount = (parseFloat(shipment.fiat_amount) / TRX_RATE).toFixed(6);
+
+        return {
+            success: true,
+            data: {
+                payWallet: process.env.OUR_WALLET,
+                sendTrxSumm: trxAmount,
+                sendUsdtSumm: shipment.fiat_amount,
+                message: 'Ожидается оплата'
+            }
+        };
+    } catch (error) {
+        console.error('Error getting payment info:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     createCompany,
     createSupplier,
@@ -650,5 +701,6 @@ module.exports = {
     updateSupplierWallet,
     getCompaniesAndSuppliersForShipment,
     checkSupplierWallet,
-    getEntityData
+    getEntityData,
+    getPaymentInfo
 };

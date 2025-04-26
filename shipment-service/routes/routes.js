@@ -253,4 +253,19 @@ router.post('/addSupplierWallet', authMiddleware, async (req, res) => {
     }
 });
 
+// Получение информации о платеже
+router.get('/getPaymentInfo/:shipmentId', authMiddleware, async (req, res) => {
+    const shipmentId = req.params.shipmentId;
+    try {
+        const result = await service.getPaymentInfo(shipmentId);
+        res.status(200).json(result);
+    } catch (err) {
+        console.error('Error in getPaymentInfo:', err);
+        res.status(500).json({ 
+            success: false, 
+            error: err.message || 'Failed to get payment info' 
+        });
+    }
+});
+
 module.exports = router;

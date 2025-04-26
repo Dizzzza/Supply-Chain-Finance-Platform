@@ -1,119 +1,79 @@
 import React from 'react';
-import { EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { FaTelegram } from 'react-icons/fa';
+import KatyaImage from './creators/Катя.jpg';
+import ArturImage from './creators/Артур.jpg';
+import DoszhanImage from './creators/Досжан.jpg';
+import DiasImage from './creators/Диас.jpg';
 
 const Contact = () => {
+  const team = [
+    {
+      name: 'Катя',
+      role: 'Тимлид и фронтенд-разработчик',
+      telegram: 'https://t.me/Kucenok',
+      image: KatyaImage
+    },
+    {
+      name: 'Артур',
+      role: 'Бэкенд-разработчик и интеграция API',
+      telegram: 'https://t.me/ARARIO',
+      image: ArturImage
+    },
+    {
+      name: 'Досжан',
+      role: 'Дизайнер и фронтенд-разработчик',
+      telegram: 'https://t.me/dr_dos_152',
+      image: DoszhanImage
+    },
+    {
+      name: 'Диас',
+      role: 'Техлид и разработчик смарт-контрактов',
+      telegram: 'https://t.me/tegdlyaAbyla',
+      image: DiasImage
+    }
+  ];
+
   return (
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="text-center">
         <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-          Свяжитесь с нами
+          Наша команда
         </h2>
         <p className="mt-4 text-xl text-gray-500">
-          Мы всегда готовы помочь вам и ответить на все вопросы
+          Познакомьтесь с разработчиками, которые создали эту платформу
         </p>
       </div>
 
+      {/* Команда разработчиков */}
       <div className="mt-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-          {/* Контактная информация */}
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900">Контактная информация</h3>
-            <div className="mt-8 space-y-6">
-              <div className="flex items-center">
-                <PhoneIcon className="h-6 w-6 text-gray-400" />
-                <span className="ml-3 text-lg text-gray-500">+7 (777) 777-77-77</span>
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {team.map((member, index) => (
+            <div 
+              key={index} 
+              className="bg-white rounded-xl shadow-lg overflow-hidden transform transition duration-300 hover:scale-105"
+            >
+              <div className="relative h-[400px]">
+                <img
+                  src={member.image}
+                  alt={member.name}
+                  className="absolute inset-0 w-full h-full object-cover object-top"
+                />
               </div>
-              <div className="flex items-center">
-                <EnvelopeIcon className="h-6 w-6 text-gray-400" />
-                <span className="ml-3 text-lg text-gray-500">info@supplychain.finance</span>
-              </div>
-              <div className="flex items-center">
-                <MapPinIcon className="h-6 w-6 text-gray-400" />
-                <span className="ml-3 text-lg text-gray-500">
-                  Алматы, ул. Сатпаева 22, офис 505
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-12">
-              <h4 className="text-xl font-semibold text-gray-900">Часы работы</h4>
-              <div className="mt-4 space-y-2 text-lg text-gray-500">
-                <p>Понедельник - Пятница: 9:00 - 18:00</p>
-                <p>Суббота - Воскресенье: Выходной</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Форма обратной связи */}
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900">Напишите нам</h3>
-            <form className="mt-8 space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Ваше имя
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="name"
-                    id="name"
-                    className="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    className="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
-                  Тема
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    name="subject"
-                    id="subject"
-                    className="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700">
-                  Сообщение
-                </label>
-                <div className="mt-1">
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={4}
-                    className="shadow-sm focus:ring-primary-500 focus:border-primary-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
+                <p className="mt-2 text-sm text-gray-600">{member.role}</p>
+                <a
+                  href={member.telegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
-                  Отправить сообщение
-                </button>
+                  <FaTelegram className="h-5 w-5 mr-2" />
+                  Написать в Telegram
+                </a>
               </div>
-            </form>
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

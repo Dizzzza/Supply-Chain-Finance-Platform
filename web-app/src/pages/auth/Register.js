@@ -145,16 +145,16 @@ const Register = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <EnvelopeIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Введите email адрес"
-                />
+              />
               </div>
             </div>
 
@@ -167,16 +167,16 @@ const Register = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <BuildingOfficeIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="entityName"
-                  name="entityName"
-                  type="text"
-                  value={formData.entityName}
-                  onChange={handleChange}
-                  required
+              <input
+                id="entityName"
+                name="entityName"
+                type="text"
+                value={formData.entityName}
+                onChange={handleChange}
+                required
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder={`Введите название ${userType === 'company' ? 'компании' : 'поставщика'}`}
-                />
+              />
               </div>
             </div>
 
@@ -189,15 +189,15 @@ const Register = () => {
                 <div className="absolute top-3 left-3 pointer-events-none">
                   <DocumentTextIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <textarea
-                  id="description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder={`Введите описание ${userType === 'company' ? 'компании' : 'поставщика'}`}
-                  rows="3"
-                />
+                rows="3"
+              />
               </div>
             </div>
 
@@ -210,17 +210,17 @@ const Register = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <UserIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
+              <input
+                id="username"
+                name="username"
+                type="text"
+                value={formData.username}
+                onChange={handleChange}
+                required
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Введите имя пользователя"
-                />
-              </div>
+              />
+            </div>
             </div>
 
             {/* Пароль */}
@@ -232,16 +232,16 @@ const Register = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Минимум 6 символов"
-                />
+              />
               </div>
             </div>
 
@@ -254,16 +254,16 @@ const Register = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <LockClosedIcon className="h-5 w-5 text-gray-400" />
                 </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
                   className="appearance-none block w-full pl-10 px-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 sm:text-sm"
                   placeholder="Повторите пароль"
-                />
+              />
               </div>
             </div>
           </div>
@@ -294,8 +294,8 @@ const Register = () => {
                 to="/login" 
                 className="font-medium text-primary-600 hover:text-primary-500 transition-colors duration-200"
               >
-                Уже есть аккаунт? Войти
-              </Link>
+              Уже есть аккаунт? Войти
+            </Link>
             </div>
           </div>
         </form>
