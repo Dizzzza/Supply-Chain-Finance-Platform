@@ -42,9 +42,9 @@ router.post('/createShipment', authMiddleware, async (req, res) => {
 
 // Создание транзакции
 router.post('/createTransaction', authMiddleware, async (req, res) => {
-    const { shipmentId, blockchainTxId, trxAmount, usdtAmount } = req.body;
+    const { shipmentId, blockchainTxId } = req.body;
     try {
-        const result = await service.createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmount);
+        const result = await service.createTransaction(shipmentId, blockchainTxId);
         res.status(201).json(result);
     } catch (err) {
         console.error('❌ Ошибка в createTransaction:', err);

@@ -126,13 +126,26 @@ async function createShipment(companyId, supplierId, fiatAmount, status, handler
 }
 
 // Функция для создания транзакции
-async function createTransaction(shipmentId, blockchainTxId, trxAmount, usdtAmount) {
+async function createTransaction(shipmentId, blockchainTxId) {
     try {
         const checkQuery = `
             SELECT id FROM transactions WHERE blockchain_tx_id = $1
         `;
 
         const checkResult = await pool.query(checkQuery, [blockchainTxId]);
+
+        const shipmentQuery = `
+            SELECT * FROM shipments WHERE id = $1
+        `;
+
+        const shipmentResult = await pool.query(shipmentQuery, [shipmentId]);
+        if (shipmentResult.rows.length === 0) {
+            console.error('Shipment not found');
+            return { error: 'Shipment not found' };
+        }
+
+        const trxAmount = shipmentResult.rows[0].crypto_amount;
+        const usdtAmount = shipmentResult.rows[0].fiat_amount;
 
         console.log('🔍 Проверка существующей транзакции:', checkResult.rows);
 
