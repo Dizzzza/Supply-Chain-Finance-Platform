@@ -554,29 +554,16 @@ const Transactions = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     ID транзакции в блокчейне
                   </label>
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
-                      value={transactionData.blockchainTxId}
-                      onChange={(e) => setTransactionData({
-                        ...transactionData,
-                        blockchainTxId: e.target.value
-                      })}
-                      required
-                    />
-                    <a
-                      href="https://nile.tronscan.org/#/address/TSeoJWvsQKkeiAaaZND7ug67Bkv8bA62kD"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-sm text-primary-600 hover:text-primary-700"
-                    >
-                      <span>Открыть TronScan для копирования ID транзакции</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
+                  <input
+                    type="text"
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-primary-500 focus:border-primary-500 sm:text-sm transition-all duration-200"
+                    value={transactionData.blockchainTxId}
+                    onChange={(e) => setTransactionData({
+                      ...transactionData,
+                      blockchainTxId: e.target.value
+                    })}
+                    required
+                  />
                 </div>
 
                 <motion.div 
