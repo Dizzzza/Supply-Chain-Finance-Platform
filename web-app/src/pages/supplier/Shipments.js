@@ -18,6 +18,21 @@ import {
   CubeTransparentIcon,
   UsersIcon
 } from '@heroicons/react/24/outline';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar
+} from 'recharts';
 
 const Shipments = () => {
   const [shipments, setShipments] = useState([]);
@@ -60,6 +75,10 @@ const Shipments = () => {
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [walletWarning, setWalletWarning] = useState(false); // Состояние для отображения предупреждения
+  const [chartData, setChartData] = useState({
+    statusDistribution: [],
+    timelineData: [],
+  });
 
   useEffect(() => {
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZnJvbnRlbmQiLCJpYXQiOjE3NDUxMzcxMDZ9.GUyvQfstgNuUuD_9WqMMlH6UhbYSUYVbNmlzLm6fJK4');
@@ -69,6 +88,7 @@ const Shipments = () => {
   useEffect(() => {
     if (selectedEntityId) {
       fetchShipments();
+      prepareChartData();
     }
   }, [selectedType, selectedEntityId]);
 
@@ -308,6 +328,56 @@ const Shipments = () => {
       setLoading(prev => ({ ...prev, details: false }));
     }
   };
+
+  const prepareChartData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers = {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      };
+
+      // Получаем данные для графиков
+      const response = await axios.get(
+        `http://localhost:3003/ship/getShipments?type=${selectedType}&id=${selectedEntityId}`,
+        headers
+      );
+
+      // Подготавливаем данные для распределения статусов
+      const statusCounts = response.data.reduce((acc, shipment) => {
+        acc[shipment.status] = (acc[shipment.status] || 0) + 1;
+        return acc;
+      }, {});
+
+      const statusData = Object.entries(statusCounts).map(([name, value]) => ({
+        name,
+        value
+      }));
+
+      // Подготавливаем данные для временной линии
+      const timelineData = response.data.reduce((acc, shipment) => {
+        const date = new Date(shipment.created_at).toLocaleDateString();
+        acc[date] = (acc[date] || 0) + 1;
+        return acc;
+      }, {});
+
+      const timelineArray = Object.entries(timelineData).map(([date, count]) => ({
+        date,
+        count
+      }));
+
+      setChartData({
+        statusDistribution: statusData,
+        timelineData: timelineArray,
+      });
+
+    } catch (error) {
+      console.error('Ошибка при получении данных для графиков:', error);
+    }
+  };
+
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   // Определение анимаций
   const pageVariants = {
@@ -1185,6 +1255,72 @@ const Shipments = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Графики */}
+          <motion.div 
+            className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-2"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            {/* График распределения статусов */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Распределение статусов поставок</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData.statusDistribution}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.statusDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* График временной линии */}
+            <div className="bg-white p-6 rounded-xl shadow-lg">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Динамика поставок</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData.timelineData}
+                    margin={{
+                      top: 5,
+                      right: 30,
+                      left: 20,
+                      bottom: 5,
+                    }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#8884d8"
+                      activeDot={{ r: 8 }}
+                      name="Количество поставок"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
     </motion.div>
