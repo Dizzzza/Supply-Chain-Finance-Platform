@@ -129,18 +129,9 @@ const Transactions = () => {
       );
       if (response.data) {
         setSelectedShipment(response.data);
-        // Получаем информацию о платеже
-        const paymentResponse = await axios.post(
-          'http://localhost:3003/ship/createShipment',
-          {
-            companyId: response.data.database.company_id,
-            supplierId: response.data.database.supplier_id,
-            fiatAmount: response.data.database.fiat_amount,
-            status: "Started",
-            handler: response.data.database.handler,
-            name: response.data.database.shipment_name,
-            description: response.data.database.shipment_description
-          },
+        // Получаем информацию о платеже для существующей поставки
+        const paymentResponse = await axios.get(
+          `http://localhost:3003/ship/getPaymentInfo/${selectedShipmentId}`,
           getAuthHeaders()
         );
         if (paymentResponse.data.success) {
