@@ -56,7 +56,7 @@ const Profile = () => {
         setUserData({
           username: userResponse.data.username,
           email: userResponse.data.email,
-          role: userResponse.data.role === 'company' ? 'Компания' : 'Поставщик',
+          role: userResponse.data.role_type === 'company' ? 'Компания' : 'Поставщик',
           entityName: entityResponse.data.data.name || 'Не указано',
           entityDescription: entityResponse.data.data.description || 'Не указано',
           entityWallet: entityResponse.data.data.wallet_address || 'Не указан'
