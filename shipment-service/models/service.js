@@ -117,7 +117,7 @@ async function createShipment(companyId, supplierId, fiatAmount, status, handler
             payWallet: process.env.OUR_WALLET,
             sendTrxSumm: trxAmount,
             sendUsdtSumm: fiatAmount,
-            message: 'Shipment created and waiting for transaction',
+            message: 'Shipment created and waiting for transaction'
         };
     } catch (error) {
         console.error('Error creating shipment:', error);
