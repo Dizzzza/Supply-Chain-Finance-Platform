@@ -159,11 +159,11 @@ router.post('/updateStatus', authMiddleware, async (req, res) => {
         const amount = await service.getAmountByUuid(shipmentUuid);
         amountInSun = amount * 1e6;
     }
-    console.log(amountInSun);
     try {
-        const result = await contract.updateStatus(shipmentUuid, status, handler, amountInSun || 0);
-        if (result.success) {
-            res.status(200).json(result);
+        const db = await service.updateStatus(shipmentUuid, status, handler);
+        const contractResult = await contract.updateStatus(shipmentUuid, status, handler, amountInSun || 0);
+        if (contractResult.success) {
+            res.status(200).json({contractResult, db});
         } else {
             res.status(400).json(result); // Более точный статус для ошибки
         }

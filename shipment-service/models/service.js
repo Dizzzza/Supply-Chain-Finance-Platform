@@ -480,7 +480,7 @@ async function getAmountByUuid(uuid) {
         return roundedAmount
     } catch (error) {
         console.error('Error revoking token:', error);
-        throw error;
+        return { error: 'Failed to fetch amount' };
     }
 };
 
@@ -687,6 +687,25 @@ async function getPaymentInfo(shipmentId) {
     }
 }
 
+async function updateStatus(shipmentUuid, status, handler) {
+    const statusQuery = `
+        UPDATE shipments
+        SET status = $1, handler = $2
+        WHERE uuid = $3
+        RETURNING *;
+    `;
+    try {
+        const result = await pool.query(statusQuery, [status, handler, shipmentUuid]);
+        if (result.rows.length === 0) {
+            throw new Error('Shipment not found');
+        }
+        return result.rows[0]; // Возвращаем обновлённую запись
+    } catch (error) {
+        console.error(`Error updating shipment status:`, error);
+        throw error;
+    }
+}
+
 module.exports = {
     createCompany,
     createSupplier,
@@ -702,5 +721,6 @@ module.exports = {
     getCompaniesAndSuppliersForShipment,
     checkSupplierWallet,
     getEntityData,
-    getPaymentInfo
+    getPaymentInfo,
+    updateStatus
 };
