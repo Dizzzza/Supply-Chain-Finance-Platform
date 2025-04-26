@@ -564,6 +564,15 @@ const Transactions = () => {
                     })}
                     required
                   />
+                  <a 
+                    href="https://nile.tronscan.org/#/address/TSeoJWvsQKkeiAaaZND7ug67Bkv8bA62kD" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="mt-2 text-sm text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                  >
+                    <ArrowPathIcon className="h-4 w-4" />
+                    Проверить транзакцию на TronScan
+                  </a>
                 </div>
 
                 <motion.div 
