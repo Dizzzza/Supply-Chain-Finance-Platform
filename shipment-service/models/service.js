@@ -150,7 +150,8 @@ async function createTransaction(shipmentId, blockchainTxId) {
         console.log('🔍 Проверка существующей транзакции:', checkResult.rows);
 
         if (checkResult.rows.length > 0 ){
-            throw new Error('Эта транзакция уже была обработана ранее');
+            console.error('Эта транзакция уже была обработана ранее');
+            return { error: 'Эта транзакция уже была обработана ранее' };
         }
 
         const result = await checkTx(blockchainTxId, trxAmount, usdtAmount);
@@ -158,7 +159,8 @@ async function createTransaction(shipmentId, blockchainTxId) {
         console.log('✨ Результат проверки транзакции:', result);
 
         if (result.error) {
-            throw new Error(result.error);
+            console.error('❌ Ошибка проверки транзакции:', result.error);
+            return { error: result.error };
         }
         
         const transactionQuery = `
@@ -314,7 +316,7 @@ async function processShipment(shipmentId, txHash, cryptoToAdd, fiatToAdd) {
             return {
                 shipmentUuid,
                 token,
-                message: 'Shipment initialized successfully',
+                message: 'Обязательно сохраните токен, он будет использоваться для проверки транзакции',
             };
         } else {
             // Обработка платежа в контракте
