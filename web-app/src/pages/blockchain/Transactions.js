@@ -23,10 +23,12 @@ const Transactions = () => {
   const [shipments, setShipments] = useState([]);
   const [selectedShipment, setSelectedShipment] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [transactionData, setTransactionData] = useState({
     blockchainTxId: '',
   });
   const token = process.env.REACT_APP_API_TOKEN;
+  const [successData, setSuccessData] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [loading, setLoading] = useState({
     entities: false,
@@ -40,6 +42,7 @@ const Transactions = () => {
     shipment: null,
     transaction: null
   });
+  const [copyNotification, setCopyNotification] = useState({ show: false, text: '' });
 
   useEffect(() => {
     localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZnJvbnRlbmQiLCJpYXQiOjE3NDUxMzcxMDZ9.GUyvQfstgNuUuD_9WqMMlH6UhbYSUYVbNmlzLm6fJK4');
@@ -162,13 +165,6 @@ const Transactions = () => {
       usdtAmount: parseFloat(paymentInfo?.sendUsdtSumm || selectedShipment.database.fiat_amount)
     };
 
-    console.log('🚀 Создание новой транзакции:');
-    console.log('📦 ID поставки:', transactionPayload.shipmentId);
-    console.log('🔗 TX Hash:', transactionPayload.blockchainTxId);
-    console.log('💰 Сумма TRX:', transactionPayload.trxAmount);
-    console.log('💵 Сумма USDT:', transactionPayload.usdtAmount);
-    console.log('🏦 Адрес кошелька для оплаты:', paymentInfo?.payWallet);
-
     try {
       const response = await axios.post(
         'http://localhost:3003/ship/createTransaction',
@@ -176,9 +172,27 @@ const Transactions = () => {
         getAuthHeaders()
       );
 
+      console.log('Ответ от сервера:', response.data);
+
       if (response.data.success) {
         console.log('✅ Транзакция успешно создана:', response.data);
         setShowCreateModal(false);
+        
+        // Проверяем структуру данных
+        if (response.data.shipment) {
+          console.log('Данные о поставке:', response.data.shipment);
+          setSuccessData({
+            shipment: {
+              shipmentUuid: response.data.shipment.shipmentUuid,
+              token: response.data.shipment.token,
+              message: response.data.shipment.message
+            }
+          });
+          setShowSuccessModal(true);
+        } else {
+          console.error('Отсутствуют данные о поставке в ответе');
+        }
+        
         fetchShipmentDetails();
         setTransactionData({ blockchainTxId: '' });
       }
@@ -251,6 +265,14 @@ const Transactions = () => {
       backgroundColor: "rgba(59, 130, 246, 0.05)",
       transition: { duration: 0.2 }
     }
+  };
+
+  const handleCopy = (text, type) => {
+    navigator.clipboard.writeText(text);
+    setCopyNotification({ show: true, text: `${type} успешно скопирован` });
+    setTimeout(() => {
+      setCopyNotification({ show: false, text: '' });
+    }, 2000);
   };
 
   return (
@@ -642,6 +664,100 @@ const Transactions = () => {
             </motion.div>
           </motion.div>
       )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSuccessModal && successData && (
+          <motion.div 
+            className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div 
+              className="relative p-6 bg-white w-full max-w-md m-auto rounded-xl shadow-xl"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Транзакция успешно создана
+                </h3>
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="text-gray-400 hover:text-gray-500 transition-colors"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Shipment UUID:</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-mono bg-white p-2 rounded border border-gray-200 flex-1 break-all">
+                      {successData.shipment.shipmentUuid}
+                    </p>
+                    <button
+                      onClick={() => handleCopy(successData.shipment.shipmentUuid, 'UUID')}
+                      className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                      title="Копировать UUID"
+                    >
+                      <DocumentTextIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Токен:</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-mono bg-white p-2 rounded border border-gray-200 flex-1 break-all">
+                      {successData.shipment.token}
+                    </p>
+                    <button
+                      onClick={() => handleCopy(successData.shipment.token, 'Токен')}
+                      className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                      title="Копировать токен"
+                    >
+                      <DocumentTextIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 p-4 rounded-lg">
+                  <p className="text-sm text-red-700 font-medium">
+                    Обязательно сохраните токен, он будет использоваться для проверки транзакции
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-end">
+                <motion.button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all duration-200"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Закрыть
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {copyNotification.show && (
+          <motion.div
+            className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+          >
+            {copyNotification.text}
+          </motion.div>
+        )}
       </AnimatePresence>
     </motion.div>
   );
