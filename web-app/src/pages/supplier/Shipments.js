@@ -31,6 +31,7 @@ const Shipments = () => {
   const [tempWalletAddress, setTempWalletAddress] = useState('');
   const [selectedType, setSelectedType] = useState('company');
   const [selectedEntityId, setSelectedEntityId] = useState('');
+  const token = process.env.REACT_APP_API_TOKEN;
   const [formData, setFormData] = useState({
     companyId: '',
     supplierId: '',
@@ -61,15 +62,12 @@ const Shipments = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [walletWarning, setWalletWarning] = useState(false); // Состояние для отображения предупреждения
 
-  useEffect(() => {
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiZnJvbnRlbmQiLCJpYXQiOjE3NDUxMzcxMDZ9.GUyvQfstgNuUuD_9WqMMlH6UhbYSUYVbNmlzLm6fJK4');
-    fetchCompaniesAndSuppliers();
-  }, []);
 
   useEffect(() => {
     if (selectedEntityId) {
       fetchShipments();
     }
+    fetchCompaniesAndSuppliers();
   }, [selectedType, selectedEntityId]);
 
   useEffect(() => {
@@ -93,7 +91,6 @@ const Shipments = () => {
   }, [user]);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
     if (!token) {
       // Если токен не найден, перенаправляем на страницу логина
       window.location.href = '/login';

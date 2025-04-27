@@ -18,6 +18,7 @@ const Profile = () => {
   const [error, setError] = useState(null); // Состояние для обработки ошибок
   const [walletInput, setWalletInput] = useState(''); // Состояние для ввода кошелька
   const [showWalletInput, setShowWalletInput] = useState(false); // Состояние для отображения поля ввода
+  const token = process.env.REACT_APP_API_TOKEN;
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -28,7 +29,6 @@ const Profile = () => {
           return;
         }
 
-        const token = localStorage.getItem('token');
         if (!token) {
           setError('Требуется авторизация');
           setLoading(false);
@@ -78,7 +78,6 @@ const Profile = () => {
 
   const handleAddWallet = async () => {
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.post(
         'http://localhost:3003/ship/addSupplierWallet',
         {

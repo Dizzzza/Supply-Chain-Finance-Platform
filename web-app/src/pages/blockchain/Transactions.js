@@ -26,6 +26,7 @@ const Transactions = () => {
   const [transactionData, setTransactionData] = useState({
     blockchainTxId: '',
   });
+  const token = process.env.REACT_APP_API_TOKEN;
   const [paymentInfo, setPaymentInfo] = useState(null);
   const [loading, setLoading] = useState({
     entities: false,
@@ -58,7 +59,6 @@ const Transactions = () => {
   }, [selectedShipmentId]);
 
   const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
     if (!token) {
       window.location.href = '/login';
       return {};
